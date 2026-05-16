@@ -27,6 +27,68 @@ GitHubトレンドと公式ドキュメントの最新情報を取得し、設�
 - https://code.claude.com/docs/en/hooks
 - https://code.claude.com/docs/en/memory
 
+**Agent SDK / Managed Agents（WebFetch）:**
+- https://code.claude.com/docs/en/agent-sdk/overview
+- https://code.claude.com/docs/en/agent-sdk/subagents
+- https://code.claude.com/docs/en/agent-teams
+- https://code.claude.com/docs/en/agent-view
+- https://platform.claude.com/docs/en/managed-agents/overview
+
+Agent SDK 調査で特に抽出すべき概念:
+- オーケストレーター / ワーカーの役割分担原則
+- エージェント間ハンドオフの設計（何を渡し、何を渡さないか）
+- ガードレール（入力バリデーション・出力検証・エスカレーション条件）
+- ツール設計原則（最小権限・冪等性・エラーの明示）
+
+Managed Agents 調査で特に抽出すべき概念:
+- Agent SDK との使い分け判断基準（自社インフラ vs Anthropic ホスト）
+- サンドボックス設計（何がセッションをまたいで保持されるか）
+- REST API としての統合パターン（カスタムツールの実行フロー）
+- プロトタイプ → 本番移行のパス
+
+**MCP 設計パターン（WebFetch）:**
+- https://code.claude.com/docs/en/mcp
+- https://modelcontextprotocol.io/introduction
+- `gh api repos/modelcontextprotocol/servers/contents/README.md --jq '.content' | base64 -d | head -200`（公式 MCP サーバー一覧）
+
+MCP 設計で特に抽出すべき概念:
+- カスタム MCP サーバーを作るか既存を使うかの判断基準
+- ツールスキーマ設計原則（命名・引数・レスポンス形式）
+- MCP サーバーのスコープ設定（プロジェクト / ユーザー / グローバル）
+- 認証・セキュリティ設計（トークン管理・スコープ制限）
+
+**モデル選択・コスト最適化（既存ソースから抽出）:**
+- 既存調査ソース（CHANGELOG・公式ドキュメント）からモデル選択基準を抽出
+
+モデル選択で特に抽出すべき概念:
+- タスク種別ごとの推奨モデル（haiku / sonnet / opus の使い分け）
+- コンテキスト長とコストのトレードオフ
+- サブエージェントへのモデル割り当てパターン
+- Fast Mode（Opus 高速化）の活用場面
+
+**スキル設計思想（既存ソース + 公式ドキュメントから抽出）:**
+- https://code.claude.com/docs/en/skills（存在する場合）
+- 既存調査ソース（awesome-claude-code・best-practice 等）からスキル設計に関する記述を抽出
+
+**エラーリカバリー・冪等性（既存ソース + 公式ドキュメントから抽出）:**
+- https://code.claude.com/docs/en/agent-sdk/overview（エラーハンドリング関連）
+- 既存調査ソースからエラー設計に関する記述を抽出
+
+エラーリカバリー・冪等性として特に抽出すべき概念:
+- 部分失敗時のリカバリー戦略（どこから再開するか）
+- 冪等な操作設計（同じ処理を複数回実行しても安全か）
+- サイレント失敗の防止（エラーをどう上位に伝播するか）
+- チェックポイント設計（長時間タスクの途中保存）
+- タイムアウト・リトライの設計原則
+
+スキル設計思想として特に抽出すべき概念:
+- スキル / コマンド / エージェントの使い分け判断基準
+- `description` の書き方（自動呼び出し精度に直結）
+- スキルのスコープ定義（1スキル1責務の原則）
+- スキル間の依存関係設計（循環依存の回避）
+- 入出力の契約（何を受け取り、何を返すか）
+- エラー時の振る舞い（サイレント失敗しない設計）
+
 ### 3. 差分検出・記録
 - 前回調査との差分を検出する
 - `knowledge/trends/YYYY-MM-DD.md` に詳細レポートを保存する（日本語）
@@ -39,10 +101,22 @@ GitHubトレンドと公式ドキュメントの最新情報を取得し、設�
 - ユーザーの明示的な承認を待つ
 - 承認後に反映し、git commit & push する
 
+### 5. NotebookLM への資料追加
+承認・反映後、手順2で取得した**生の資料**を NotebookLM に追加する:
+- 対象ノートブック: **Claude Code トレンドログ**（なければ新規作成）
+- 追加するソース:
+  - 手順2で取得した GitHub リポジトリの README（各リポジトリ分）
+  - 手順2で取得した公式ドキュメントの内容
+  - `knowledge/trends/YYYY-MM-DD.md`（今回の調査レポート）
+- NotebookLM 上で要約を生成し、後日「どのリポジトリに何が書いてあったか」を横断検索できる状態にする
+
+※ Claude の役割は資料の選定・取得まで。要約・蓄積・追加質問対応は NotebookLM が担う（`~/.claude/CLAUDE.md` 参照）
+
 ## 制約
 
 MUST: ユーザーの承認を得てから docs/ を更新する
 MUST NOT: 承認なしに自動上書きする
+MUST: NotebookLM への追加は手順4（承認フロー）完了後に行う
 
 ## ナレッジベース
 
