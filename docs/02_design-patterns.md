@@ -1,6 +1,6 @@
 # Claude Code 設計パターン集
 
-最終更新: 2026-05-15
+最終更新: 2026-05-18
 
 ## アーキテクチャパターン
 
@@ -124,6 +124,133 @@ PostToolUse でブロック後、拒否理由を Claude にフィードバック
 }
 ```
 
+### asyncRewake（長時間バックグラウンドモニタリング）
+
+バックグラウンドで実行し、exit code 2 で Claude を再起動させるパターン。
+
+```json
+{
+  "type": "command",
+  "command": "background-monitor.sh",
+  "async": true,
+  "asyncRewake": true
+}
+```
+
+- バックグラウンドで実行（Claude をブロックしない）
+- exit code 2 で Claude を再起動（stderrがsystem reminderとして表示）
+- CIビルド監視・テスト完了待機などの長時間処理に最適
+
+### once: true（セッション中1回のみ実行）
+
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [{ "type": "command", "command": "setup.sh", "once": true }]
+      }
+    ]
+  }
+}
+```
+
+### PermissionRequest / PermissionDenied（権限の自動制御）
+
+```json
+{
+  "hooks": {
+    "PermissionDenied": [
+      {
+        "matcher": "Bash",
+        "hooks": [{ "type": "command", "command": "retry-check.sh" }]
+      }
+    ]
+  }
+}
+```
+
+`retry-check.sh` が `{retry: true}` を返すと操作をリトライ。
+
+### PostToolBatch（並列ツール呼び出し後の検証）
+
+複数ツールが並列実行された後、次のモデル呼び出し前にブロックできる。
+
+```json
+{
+  "hooks": {
+    "PostToolBatch": [
+      {
+        "hooks": [{ "type": "command", "command": "batch-validate.sh" }]
+      }
+    ]
+  }
+}
+```
+
+### HTTPフック with allowedEnvVars（認証付き外部エンドポイント）
+
+```json
+{
+  "type": "http",
+  "url": "https://api.company.com/hooks",
+  "headers": { "Authorization": "Bearer $CI_TOKEN" },
+  "allowedEnvVars": ["CI_TOKEN"]
+}
+```
+
+### AGENTS.md 互換パターン（マルチエージェントフレームワーク共存）
+
+Claude Code は `CLAUDE.md` を読む（`AGENTS.md` は読まない）。複数エージェントが共存するリポジトリでは：
+
+```markdown
+<!-- CLAUDE.md -->
+@AGENTS.md
+
+## Claude Code 固有設定
+src/billing/ の変更には plan mode を使うこと。
+```
+
+または シンボリックリンク（Unix のみ）:
+```bash
+ln -s AGENTS.md CLAUDE.md
+```
+
+`/init` 実行時は `AGENTS.md`, `.cursorrules`, `.windsurfrules` を自動認識して取り込む。
+
+---
+
+## CLAUDE.md 設計
+
+### HTMLコメントによるメンテナーノート（トークン節約）
+
+```markdown
+<!-- このセクションは2026Q3廃止予定 - 変更時はdev@team.comに連絡 -->
+- 実際の指示: ...
+```
+
+ブロックレベルHTMLコメントはコンテキスト注入前に自動除去される。コードブロック内は保持。
+
+### /btw コマンド（コンテキスト非汚染クエリ）
+
+```text
+/btw このAPIのレート制限は？
+```
+
+回答が会話履歴に**残らない**ディスミス可能オーバーレイとして表示。実装中に細部を確認したい場面で有効。
+
+### AskUserQuestion ツールパターン（Claude インタビュー）
+
+大型機能の開発前に Claude がユーザーにインタビューする公式推奨パターン：
+
+```text
+[機能のブリーフ説明]を実装したい。AskUserQuestion ツールで詳細にインタビューしてほしい。
+技術実装、UI/UX、エッジケース、トレードオフについて聞いてほしい。
+終わったら完全な仕様を SPEC.md に書いてほしい。
+```
+
+仕様完成後は**新しいセッション**で実装開始（クリーンなコンテキスト）。
+
 ---
 
 ## Auto Mode
@@ -161,9 +288,11 @@ paths:
 
 ### Auto Memory
 
-- 保存先: `~/.claude/projects/<project>/memory/MEMORY.md`
+- 保存先: `~/.claude/projects/<project>/memory/MEMORY.md`（デフォルト）
 - 先頭200行 または 25KB をセッション開始時にロード
 - `/memory` コマンドで閲覧・編集・トグル
+- **サブエージェントも独自の Auto Memory を持てる**（専門知識の蓄積に有効）
+- カスタム保存場所: `autoMemoryDirectory: "~/custom-dir"` を `~/.claude/settings.json` に設定
 
 ---
 
