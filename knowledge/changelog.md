@@ -20,6 +20,16 @@
 - `docs/02_design-patterns.md`: 新規作成（承認済み）
 - `docs/03_checklist.md`: 新規作成（承認済み）
 
+## 2026-05-25（第3回調査）
+
+今週の調査では GitHub 外部リポジトリへのアクセスが引き続き失敗したため、公式ドキュメント（best-practices, sub-agents, hooks, memory）のみから差分を抽出した。最大の発見はサブエージェント機能の大幅拡張で、フロントマターフィールドが11個追加された（disallowedTools, permissionMode, maxTurns, skills, mcpServers, memory, background, effort, isolation, color, initialPrompt）。新設の `/agents` TUI コマンドでサブエージェントの作成・管理が視覚的に可能となり、実験的フォークモード（`CLAUDE_CODE_FORK_SUBAGENT=1` / `/fork`）で親会話履歴を継承したサブエージェントが起動できる。また `--agent <name>` フラグでセッション全体を特定サブエージェントとして動作させる機能も追加。フックシステムは5タイプ（command/http/mcp_tool/prompt/agent）・30イベントに確定し、新たに `if` フィールドと `CLAUDE_ENV_FILE` による環境変数永続化機能が判明。エコシステム面ではプラグインマーケットプレイス（`/plugin`）と実験的エージェントチーム（`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`）がベストプラクティスドキュメントに掲載された。
+
+### 更新ファイル
+- `knowledge/trends/2026-05-25.md`: 第3回トレンド調査レポート
+- `knowledge/trends/latest.md`: 最新情報サマリー更新
+- `docs/02_design-patterns.md`: フォーク・Agentチーム・/agents・サブエージェントメモリ等を追記
+- `docs/03_checklist.md`: 新機能チェック項目追加（2026-05-25時点）
+
 ## 2026-05-18（第2回調査）
 
 今週の調査では GitHub 外部リポジトリへのアクセスが失敗したため、公式ドキュメント（best-practices, sub-agents, hooks, memory）のみから差分を抽出した。最も重要な発見はフックシステムの大幅拡張で、PostToolBatch・SubagentStart/Stop・PermissionRequest/Denied・WorktreeCreate/Remove・Elicitation など約15種類のイベントが新たに文書化された。また、`asyncRewake: true`（バックグラウンドフックが exit code 2 で Claude を再起動）と `once: true`（セッション中1回のみ）という2つの新フックオプションも確認。CLAUDE.md 関連では AGENTS.md 相互運用ガイドの追加、HTMLコメントのコンテキスト自動除去（メンテナーメモをトークンを消費せずに残せる）、サブエージェントの独自 Auto Memory 対応が目立つ。新コマンドとして `/btw`（会話履歴に残らないサイドクエスチョン）と、`AskUserQuestion` ツールを使ったClaude によるインタビューパターンが公式ベストプラクティスに掲載された。

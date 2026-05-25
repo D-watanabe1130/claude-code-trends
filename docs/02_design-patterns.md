@@ -1,6 +1,6 @@
 # Claude Code 設計パターン集
 
-最終更新: 2026-05-18
+最終更新: 2026-05-25
 
 ## アーキテクチャパターン
 
@@ -56,12 +56,74 @@ name: security-reviewer
 description: Reviews code for security vulnerabilities
 tools: Read, Grep, Glob, Bash
 model: opus
+memory: project          # 永続メモリ（project/user/local）
+isolation: worktree      # 独立gitワークツリーで実行
+effort: high             # 努力レベルのオーバーライド
+color: red               # UIでの表示色
 ---
 ```
 
 - `description` が自動委任の判断基準（具体的に書くほど精度が上がる）
-- `tools` で権限を最小化
+- `tools` で権限を最小化（`disallowedTools` でdenylistも指定可）
 - `model` で用途別コスト最適化（調査 → haiku、品質レビュー → opus）
+- `memory: project` でセッションをまたいだ知識蓄積が可能
+
+### サブエージェント永続メモリパターン（2026-05-25+）
+
+| スコープ | 保存先 | 用途 |
+|---------|-------|------|
+| `user` | `~/.claude/agent-memory/<name>/` | 全プロジェクト横断で知識蓄積 |
+| `project` | `.claude/agent-memory/<name>/` | プロジェクト固有（バージョン管理で共有） |
+| `local` | `.claude/agent-memory-local/<name>/` | プロジェクト固有・非共有 |
+
+```yaml
+---
+name: code-reviewer
+description: Expert code reviewer. Use proactively after code changes.
+memory: project
+---
+Update your agent memory as you discover patterns, conventions, and recurring issues.
+```
+
+### フォークパターン（2026-05-25+）
+
+現在の会話履歴を継承したサブエージェントを生成。コンテキスト再説明が不要な場合に有効。プロンプトキャッシュを共有するため安価。
+
+```bash
+# 環境変数で有効化
+CLAUDE_CODE_FORK_SUBAGENT=1 claude
+
+# /fork コマンドで起動
+/fork draft unit tests for the parser changes so far
+```
+
+### Agent(agent_type) 構文（スポーン制限）（2026-05-25+）
+
+```yaml
+---
+name: coordinator
+tools: Agent(worker, researcher), Read, Bash
+---
+```
+
+`Agent(...)` なし → サブエージェント生成不可。`Agent` のみ → 全サブエージェント生成可。
+
+### セッション全体をサブエージェントとして動作（2026-05-25+）
+
+```bash
+claude --agent code-reviewer          # CLIフラグ
+
+# .claude/settings.json でプロジェクトデフォルト設定
+{"agent": "code-reviewer"}
+```
+
+### @-メンション明示呼び出し（2026-05-25+）
+
+```text
+@"code-reviewer (agent)" look at the auth changes
+```
+
+プラグイン提供のサブエージェント: `@agent-my-plugin:review:security`
 
 ---
 
@@ -123,6 +185,52 @@ PostToolUse でブロック後、拒否理由を Claude にフィードバック
   "terminalSequence": "\033]777;notify;Claude Code;処理完了\007"
 }
 ```
+
+### プロンプトフック（2026-05-25+）
+
+Claudeにyes/no判断を委ねるフック。AIによる動的ゲートキーピング。
+
+```json
+{
+  "type": "prompt",
+  "prompt": "このBashコマンドは安全ですか？ yes または no で答えてください。"
+}
+```
+
+### if フィールド（条件付きフック実行）（2026-05-25+）
+
+```json
+{
+  "type": "command",
+  "command": "security-check.sh",
+  "if": "Bash(rm *)"
+}
+```
+
+### CLAUDE_ENV_FILE（環境変数永続化）（2026-05-25+）
+
+SessionStart、CwdChanged フックで Bash 後続コマンドへ環境変数を渡す：
+
+```bash
+#!/bin/bash
+if [ -n "$CLAUDE_ENV_FILE" ]; then
+  echo 'export NODE_ENV=production' >> "$CLAUDE_ENV_FILE"
+  echo "export PROJECT_ROOT=$(pwd)" >> "$CLAUDE_ENV_FILE"
+fi
+```
+
+### watchPaths（FileChanged監視登録）（2026-05-25+）
+
+```json
+{
+  "hookSpecificOutput": {
+    "hookEventName": "SessionStart",
+    "watchPaths": ["/project/.envrc", "/project/.env"]
+  }
+}
+```
+
+FileChanged フック（`.envrc|.env` など）と組み合わせて使用。
 
 ### asyncRewake（長時間バックグラウンドモニタリング）
 
@@ -289,14 +397,79 @@ paths:
 ### Auto Memory
 
 - 保存先: `~/.claude/projects/<project>/memory/MEMORY.md`（デフォルト）
-- 先頭200行 または 25KB をセッション開始時にロード
+- 先頭200行 または 25KB をセッション開始時にロード（MEMORY.md のみ、トピックファイルはオンデマンド）
 - `/memory` コマンドで閲覧・編集・トグル
 - **サブエージェントも独自の Auto Memory を持てる**（専門知識の蓄積に有効）
 - カスタム保存場所: `autoMemoryDirectory: "~/custom-dir"` を `~/.claude/settings.json` に設定
 
+### claudeMdExcludes（モノレポ向け）（2026-05-25+）
+
+```json
+{
+  "claudeMdExcludes": [
+    "**/monorepo/CLAUDE.md",
+    "/home/user/monorepo/other-team/.claude/rules/**"
+  ]
+}
+```
+
+マネージドポリシーの CLAUDE.md は除外不可（組織全体で必ず適用）。
+
+### ユーザーレベルルール（2026-05-25+）
+
+```
+~/.claude/rules/
+├── preferences.md   # 全プロジェクトに適用する個人設定
+└── workflows.md     # 個人ワークフロー
+```
+
+プロジェクトルールより先にロードされるため、プロジェクトルールが優先。
+
+### .claude/rules/ シンボリックリンク（2026-05-25+）
+
+```bash
+ln -s ~/shared-claude-rules .claude/rules/shared
+ln -s ~/company-standards/security.md .claude/rules/security.md
+```
+
 ---
 
-## MCP 設計パターン
+## プラグイン設計（2026-05-25+）
+
+プラグインはスキル・フック・サブエージェント・MCPサーバーをバンドルしたインストール単位。
+
+```
+/plugin  # マーケットプレイスを開く
+```
+
+プラグインからのサブエージェントはセキュリティ上の理由から `hooks`・`mcpServers`・`permissionMode` フロントマターが無視される。必要な場合は `.claude/agents/` にコピーして使う。
+
+### コードインテリジェンスプラグイン
+
+typed言語（TypeScript、Python等）向け。シンボルナビゲーション・自動エラー検出を提供。
+
+---
+
+## Agent Teams パターン（実験的）（2026-05-25+）
+
+```bash
+CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 claude
+```
+
+サブエージェント間を `SendMessage` ツールで通信。チームリードが複数ワーカーを協調制御。
+
+```text
+# サブエージェントを再開するパターン
+Use the code-reviewer subagent to review the authentication module
+[完了後]
+Continue that code review and now analyze the authorization logic
+```
+
+サブエージェントIDは `~/.claude/projects/{project}/{sessionId}/subagents/agent-{id}.jsonl` で確認。
+
+---
+
+## CLAUDE.md 設計
 
 > ★ 未取得 — 次回 trendupdate で `code.claude.com/docs/en/mcp` および `modelcontextprotocol.io` を調査して補完する
 

@@ -1,51 +1,67 @@
 # 最新トレンド（直近調査）
 
-**調査日**: 2026-05-18
-**参照ファイル**: [2026-05-18.md](./2026-05-18.md)
+**調査日**: 2026-05-25
+**参照ファイル**: [2026-05-25.md](./2026-05-25.md)
 
 ## 現在の最新バージョン
-- Claude Code: **v2.1.142以降**（2026-05-18時点、CHANGELOG取得失敗のため詳細不明）
-- Fast Mode モデル: **Opus 4.7**（v2.1.142から）
+- Claude Code: **v2.1.142以降**（CHANGELOG取得失敗のため詳細不明）
+- Fast Mode モデル: **Opus 4.7**
 
 ## 今週の主要変更
-1. **フックイベントが大幅拡張**（PostToolBatch, SubagentStart/Stop, TaskCreated/Completed, PermissionRequest, PermissionDenied, PreCompact/PostCompact, Elicitation, WorktreeCreate/Remove など）
-2. **AGENTS.md 相互運用性**が公式ガイドに追加（他エージェントフレームワークとの共存）
-3. **CLAUDE.md のHTMLコメント自動除去**（`<!-- notes -->`がコンテキスト注入前に削除）
-4. **`asyncRewake: true`** フックオプション追加（バックグラウンド実行+exit code 2でClaude起動）
-5. **`once: true`** フックフィールド追加（セッション中1回のみ実行）
-6. **サブエージェントのAuto Memory** が公式ドキュメントに明記
-7. **`/btw` コマンド**（会話履歴に残らないサイドクエスチョン）
-8. **`autoMemoryDirectory`** 設定（Auto Memory の保存場所カスタマイズ）
+1. **サブエージェントフロントマターが大幅拡張**（11フィールド追加: disallowedTools, permissionMode, maxTurns, skills, mcpServers, memory, background, effort, isolation, color, initialPrompt）
+2. **`/agents` コマンド**（TUIインターフェースでサブエージェントを作成・管理）
+3. **フォークモード**（`CLAUDE_CODE_FORK_SUBAGENT=1` / `/fork` コマンド）— 親会話履歴を丸ごと継承するサブエージェント
+4. **`--agent <name>` CLIフラグ** — セッション全体を特定サブエージェントとして動作させる
+5. **Agent Teams**（`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`）— 複数セッションの自動協調
+6. **プラグイン機能**（`/plugin`）— スキル・フック・サブエージェント・MCPをバンドルしてインストール
+7. **フックイベント30種確定**（新規: TeammateIdle, StopFailure, PostToolUseFailure, UserPromptExpansion, InstructionsLoaded, CwdChanged, ConfigChange, ElicitationResult, Setup）
+8. **フックタイプ `prompt` と `agent`** が追加（計5タイプ）
+9. **`claudeMdExcludes`** — モノレポで不要な CLAUDE.md をスキップ
+10. **`~/.claude/rules/`** — ユーザーレベルのパーソナルルール
 
 ## ホットトピック
-- **フックシステム完全版**: 20以上のイベントタイプが文書化
-- **Agent View** (`claude agents`): 全セッション一覧・管理
-- **AGENTS.md 互換**: `/init` が自動的に他エージェントの設定ファイルを認識
-- **asyncRewake**: 長時間バックグラウンドモニタリングパターン
-- **サブエージェント Auto Memory**: 専門エージェントの知識蓄積
-- **/btw コマンド**: コンテキスト非汚染の軽量確認ツール
+- **サブエージェントの永続メモリ**: `memory: user/project/local` でスコープ指定
+- **フォークモード**: 親コンテキストを継承して並列実験、プロンプトキャッシュ共有で安価
+- **Agent Teams**: `SendMessage` ツールでエージェント間通信、大規模並列タスクへの対応
+- **プラグインマーケットプレイス**: コードインテリジェンスプラグインでシンボルナビゲーション強化
+- **Worktrees**: 独立gitチェックアウトで並列セッションを安全に実行
+- **`/agents` TUI**: サブエージェントの作成・管理が視覚的に操作可能
 
-## 前回比較（2026-05-15 → 2026-05-18）
+## 前回比較（2026-05-18 → 2026-05-25）
 
-### 新規判明
-- フックイベント約15種類が新たに文書化
-- `asyncRewake`, `once` フックオプション
-- HTTPフックの `allowedEnvVars`
-- MCPツールフックの `input` テンプレート構文
-- プラグインフック（`hooks/hooks.json`）
-- AGENTS.md 相互運用ガイド
-- CLAUDE.md HTMLコメント除去機能
-- `claudeMd` キー（managed-settings.json）
-- `autoMemoryDirectory` 設定
-- サブエージェントの独自 Auto Memory
-- `CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD` 環境変数
-- `CLAUDE_EFFORT`, `$CLAUDE_CODE_REMOTE` 環境変数
-- `/btw` コマンド（サイドクエスチョン）
-- `AskUserQuestion` ツールパターン（公式推奨）
-- `--append-system-prompt` フラグ
-- `/sandbox` の第3権限手段としての明示化
+### 新規判明（主要30項目）
+- サブエージェントの11新フロントマターフィールド
+- `/agents` TUI管理インターフェース
+- フォークモード（`CLAUDE_CODE_FORK_SUBAGENT=1` / `/fork`）
+- `--agent` / `--agents` CLIフラグ
+- `Agent(agent_type)` 構文でサブエージェント生成制限
+- @-メンションによるサブエージェント明示呼び出し
+- サブエージェント再開（`SendMessage` ツール）
+- ビルトインサブエージェント詳細（Explore=Haiku/Plan=継承/general-purpose=全ツール）
+- フックタイプ `prompt` と `agent`（実験的）
+- 新フックイベント9種
+- フックの `if` / `shell` フィールド
+- `CLAUDE_ENV_FILE` 環境変数
+- `watchPaths`（FileChanged用）
+- `claudeMdExcludes` 設定
+- `~/.claude/rules/` ユーザーレベルルール
+- `.claude/rules/` シンボリックリンク対応
+- `InstructionsLoaded` フック（デバッグ）
+- プラグイン機能（`/plugin`）
+- Agent Teams（実験的）
+- `/rewind` の "Summarize from here" / "Summarize up to here"
+- `/compact <instructions>` カスタム圧縮
+- `claude --continue` / `claude --resume`
+- Worktrees基盤
+- コンテキストウィンドウ可視化ページ
+- Chrome拡張機能UI自動テスト
+- `CLAUDE_CODE_SUBAGENT_MODEL` / `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` 環境変数
+- `cleanupPeriodDays` 設定
+- `Ctrl+B` バックグラウンド化
+- `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS=1`
 
 ### 変化なし
 - コアバージョン: v2.1.142（推定）
-- 主要エコシステムリポジトリ
-- 基本的なワークフローパターン（Explore→Plan→Implement→Commit）
+- 基本ワークフロー（Explore→Plan→Implement→Commit）
+- 主要フックパターン（asyncRewake, once, PostToolBatch等）
+- Auto Memory 基本仕様（200行/25KB）
