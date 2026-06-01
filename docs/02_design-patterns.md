@@ -1,6 +1,6 @@
 # Claude Code 設計パターン集
 
-最終更新: 2026-05-25
+最終更新: 2026-06-01
 
 ## アーキテクチャパターン
 
@@ -95,6 +95,21 @@ CLAUDE_CODE_FORK_SUBAGENT=1 claude
 
 # /fork コマンドで起動
 /fork draft unit tests for the parser changes so far
+```
+
+### CLIフラグでセッションスコープ定義（2026-06-01+）
+
+ファイルを作成せず、`--agents` フラグで JSON を直接渡してセッション限定のサブエージェントを定義できる。CI/CD スクリプトや一時テストに有効。
+
+```bash
+claude --agents '{
+  "code-reviewer": {
+    "description": "Expert code reviewer. Use proactively after code changes.",
+    "prompt": "You are a senior code reviewer.",
+    "tools": ["Read", "Grep", "Glob", "Bash"],
+    "model": "sonnet"
+  }
+}'
 ```
 
 ### Agent(agent_type) 構文（スポーン制限）（2026-05-25+）
@@ -231,6 +246,50 @@ fi
 ```
 
 FileChanged フック（`.envrc|.env` など）と組み合わせて使用。
+
+### Setup フックイベント（一回限り初期化）（2026-06-01+）
+
+`--init-only` フラグと組み合わせて、プロジェクトへの初回セットアップ処理を定義する。通常の SessionStart とは異なり、初回のみ実行。
+
+```json
+{
+  "hooks": {
+    "Setup": [{
+      "hooks": [{ "type": "command", "command": "first-time-setup.sh" }]
+    }]
+  }
+}
+```
+
+### SessionStart フックによるセッション自動設定（2026-06-01+）
+
+SessionStart フックの `hookSpecificOutput` で、セッション名・初期メッセージ・スキル再ロードを自動制御できる。
+
+```json
+{
+  "hookSpecificOutput": {
+    "hookEventName": "SessionStart",
+    "sessionTitle": "auth-refactor",
+    "initialUserMessage": "前回のissue #42の続きを始めます",
+    "reloadSkills": true
+  }
+}
+```
+
+### mcp_tool フック型（MCPツール直接呼び出し）（2026-06-01+）
+
+MCP サーバーのツールをフックから直接呼び出す。外部サービスとの統合や高度な検証に有効。
+
+```json
+{
+  "type": "mcp_tool",
+  "server": "my_server",
+  "tool": "security_scan",
+  "input": { "file_path": "${tool_input.file_path}" }
+}
+```
+
+ツールのテキスト出力は command フックの stdout と同様に扱われる。有効な JSON であれば decision として解析される。
 
 ### asyncRewake（長時間バックグラウンドモニタリング）
 
@@ -671,6 +730,25 @@ Managed Agents（Anthropic ホスト型・REST API）
 - **最小権限**: 各エージェントに必要なツールのみ付与（`tools:` で明示）
 - **冪等性**: 同じ操作を複数回実行しても結果が変わらない設計
 - **エラーの明示**: 失敗時はサイレントに続行せず、エラー内容をオーケストレーターに返す
+
+---
+
+## 品質保証パターン
+
+### 逆境的レビューパターン（Adversarial Review）（2026-06-01+）
+
+実装後に独立コンテキストのサブエージェントでレビューを行う公式推奨パターン。実装バイアスなしに要件との一致を確認する。
+
+```text
+Use a subagent to review the rate limiter diff against PLAN.md.
+Check that every requirement is implemented, the listed edge cases have tests,
+and nothing outside the task's scope changed.
+Report gaps, not style preferences.
+```
+
+- ビルトインの `/code-review` スキルが同様の機能を提供
+- **注意**: 「ギャップを探す」指示は過剰エンジニアリングを招くため、「正確性・要件に関わるもののみ報告」と明示すること
+- レビュアーが結果を受け取り、修正して再レビューする内部ループを形成できる
 
 ---
 
