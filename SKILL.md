@@ -66,6 +66,17 @@ MCP 設計で特に抽出すべき概念:
 - サブエージェントへのモデル割り当てパターン
 - Fast Mode（Opus 高速化）の活用場面
 
+**CLAUDE.md 設計ベストプラクティス（既存ソース + 公式ドキュメントから抽出）:**
+- https://code.claude.com/docs/en/memory
+- 既存調査ソース（best-practice・awesome-claude-code 等）から CLAUDE.md に関する記述を抽出
+
+CLAUDE.md 設計として特に抽出すべき概念:
+- CLAUDE.md に書くべき内容と書かない内容の判断基準
+- グローバル（~/.claude/）とプロジェクト（.claude/）の使い分け
+- 効果的なセクション構成・記述スタイル
+- 自動読み込みの仕組みと優先順位
+- チームで共有する場合の注意点
+
 **スキル設計思想（既存ソース + 公式ドキュメントから抽出）:**
 - https://code.claude.com/docs/en/skills（存在する場合）
 - 既存調査ソース（awesome-claude-code・best-practice 等）からスキル設計に関する記述を抽出
