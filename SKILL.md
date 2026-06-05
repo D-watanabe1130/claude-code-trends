@@ -10,7 +10,7 @@ GitHubトレンドと公式ドキュメントの最新情報を取得し、設�
 ## 手順
 
 ### 1. 前回調査の確認
-`~/.claude/skills/trendupdate/knowledge/trends/latest.md` を読み込んで前回との差分検出基準を把握する。
+`~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Vault/research/trendupdate/latest.md` を読み込んで前回との差分検出基準を把握する。
 
 ### 2. 並列調査
 以下のソースを**同時に**調査する（gh CLI + WebFetch）:
@@ -91,9 +91,9 @@ MCP 設計で特に抽出すべき概念:
 
 ### 3. 差分検出・記録
 - 前回調査との差分を検出する
-- `knowledge/trends/YYYY-MM-DD.md` に詳細レポートを保存する（日本語）
-- `knowledge/trends/latest.md` を更新する
-- `knowledge/changelog.md` に差分サマリーを追記する
+- `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Vault/research/trendupdate/YYYY-MM-DD.md` に詳細レポートを保存する（日本語）
+- `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Vault/research/trendupdate/latest.md` を更新する
+- `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Vault/research/trendupdate/changelog.md` に差分サマリーを追記する
 
 ### 4. 更新案提示・承認フロー
 - `docs/02_design-patterns.md` の更新案を提示する
@@ -101,25 +101,13 @@ MCP 設計で特に抽出すべき概念:
 - ユーザーの明示的な承認を待つ
 - 承認後に反映し、git commit & push する
 
-### 5. NotebookLM への資料追加
-承認・反映後、手順2で取得した**生の資料**を NotebookLM に追加する:
-- 対象ノートブック: **Claude Code トレンドログ**（なければ新規作成）
-- 追加するソース:
-  - 手順2で取得した GitHub リポジトリの README（各リポジトリ分）
-  - 手順2で取得した公式ドキュメントの内容
-  - `knowledge/trends/YYYY-MM-DD.md`（今回の調査レポート）
-- NotebookLM 上で要約を生成し、後日「どのリポジトリに何が書いてあったか」を横断検索できる状態にする
-
-※ Claude の役割は資料の選定・取得まで。要約・蓄積・追加質問対応は NotebookLM が担う（`~/.claude/CLAUDE.md` 参照）
-
 ## 制約
 
 MUST: ユーザーの承認を得てから docs/ を更新する
 MUST NOT: 承認なしに自動上書きする
-MUST: NotebookLM への追加は手順4（承認フロー）完了後に行う
 
 ## ナレッジベース
 
-- ローカル: `~/.claude/skills/trendupdate/knowledge/`
+- Obsidian Vault: `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Vault/research/trendupdate/`
 - リモート: https://github.com/D-watanabe1130/claude-code-trends
-- 週次クラウドルーティン（月曜自動実行）が結果を push → `git pull` でローカルに反映
+- 週次スケジュールタスク（月曜 9:00 自動実行）が Vault に直接書き込む
