@@ -1,0 +1,66 @@
+name: Weekly Trend Update
+
+on:
+  schedule:
+    - cron: '0 0 * * 1'  # 毎週月曜 0:00 UTC = 9:00 JST
+  workflow_dispatch:       # 手動実行も可
+
+jobs:
+  trendupdate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run trendupdate
+        uses: anthropics/claude-code-action@beta
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            GitHubトレンドと公式ドキュメントの最新情報を取得し、knowledge/ を更新してください。
+
+            ## 手順
+
+            ### 1. 前回調査の確認
+            `knowledge/trends/latest.md` を読み込んで前回との差分検出基準を把握する。
+
+            ### 2. 並列調査
+            以下のソースを同時に調査する:
+
+            **GitHub（gh api で取得）:**
+            - `gh api repos/shanraisshan/claude-code-best-practice/contents/README.md --jq '.content' | base64 -d | head -300`
+            - `gh api repos/FlorianBruniaux/claude-code-ultimate-guide/contents/README.md --jq '.content' | base64 -d | head -200`
+            - `gh api repos/hesreallyhim/awesome-claude-code/contents/README.md --jq '.content' | base64 -d | head -200`
+            - `gh api repos/anthropics/claude-code/contents/CHANGELOG.md --jq '.content' | base64 -d | head -300`
+
+            **公式ドキュメント（WebFetch）:**
+            - https://code.claude.com/docs/en/best-practices
+            - https://code.claude.com/docs/en/sub-agents
+            - https://code.claude.com/docs/en/hooks
+            - https://code.claude.com/docs/en/memory
+            - https://code.claude.com/docs/en/agent-sdk/overview
+            - https://code.claude.com/docs/en/agent-sdk/subagents
+            - https://code.claude.com/docs/en/agent-teams
+            - https://platform.claude.com/docs/en/managed-agents/overview
+            - https://code.claude.com/docs/en/mcp
+            - https://modelcontextprotocol.io/introduction
+
+            ### 3. 差分検出・記録
+            - 前回調査との差分を検出する
+            - `knowledge/trends/YYYY-MM-DD.md` に詳細レポートを保存する（YYYY-MM-DD は本日日付、日本語）
+            - `knowledge/trends/latest.md` を今回のレポートで上書きする
+            - `knowledge/changelog.md` に差分サマリーを追記する（形式: `## YYYY-MM-DD\n- 差分内容`）
+
+            ## 制約
+            - docs/ は変更しない
+            - エラーが発生した場合は changelog.md にエラー内容を記録する
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add knowledge/
+          git diff --cached --quiet || git commit -m "trend: $(date +'%Y-%m-%d') 週次調査"
+          git push
