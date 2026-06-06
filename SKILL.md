@@ -114,9 +114,9 @@ AI オーケストレーションとして特に抽出すべき概念:
 
 ### 3. 差分検出・記録
 - 前回調査との差分を検出する
-- `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Vault/research/trendupdate/YYYY-MM-DD.md` に詳細レポートを保存する（日本語）
-- `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Vault/research/trendupdate/latest.md` を更新する
-- `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Vault/research/trendupdate/changelog.md` に差分サマリーを追記する
+- `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Vault/research/trendupdate/logs/YYYY-MM-DD.md` に詳細レポートを保存する（日本語）
+- `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Vault/research/trendupdate/logs/latest.md` を更新する
+- `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Vault/research/trendupdate/logs/changelog.md` に差分サマリーを追記する
 
 ### 4. 更新案提示・承認フロー
 - `docs/02_design-patterns.md`（インデックス）と `docs/patterns/` 配下の各ファイルの更新案を提示する
