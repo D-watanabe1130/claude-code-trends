@@ -119,10 +119,19 @@ AI オーケストレーションとして特に抽出すべき概念:
 - `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Vault/research/trendupdate/changelog.md` に差分サマリーを追記する
 
 ### 4. 更新案提示・承認フロー
-- `docs/02_design-patterns.md` の更新案を提示する
+- `docs/02_design-patterns.md`（インデックス）と `docs/patterns/` 配下の各ファイルの更新案を提示する
 - `docs/03_checklist.md` の更新案を提示する
 - ユーザーの明示的な承認を待つ
 - 承認後に反映し、git commit & push する
+
+### 5. Vault への同期
+承認・push 後に git リポジトリの `docs/patterns/` を Vault へ同期する：
+```bash
+cp ~/.claude/skills/trendupdate/docs/patterns/*.md \
+  ~/Library/Mobile\ Documents/iCloud~md~obsidian/Documents/Vault/research/trendupdate/patterns/
+cp ~/.claude/skills/trendupdate/docs/02_design-patterns.md \
+  ~/Library/Mobile\ Documents/iCloud~md~obsidian/Documents/Vault/research/trendupdate/design-patterns.md
+```
 
 ## 制約
 

@@ -71,8 +71,18 @@ jobs:
             - `knowledge/changelog.md` に差分サマリーを追記する（形式: `## YYYY-MM-DD\n- 差分内容`）
 
             ### 4. 設計パターン・チェックリストの更新
-            - `docs/02_design-patterns.md` を今回の調査結果に基づいて更新する（新しいパターン追加・古い情報の修正）
+            - `docs/02_design-patterns.md`（インデックス）の「直近の主要変更」セクションを今回の差分で更新する
+            - `docs/patterns/` 配下の各ファイルを今回の調査結果に基づいて更新する：
+              - `subagent-design.md`: サブエージェント設計の新情報
+              - `hooks.md`: フックパターンの新情報
+              - `memory-and-claude-md.md`: メモリ・CLAUDE.md設計の新情報
+              - `ai-orchestration.md`: AIオーケストレーションの新情報
+              - `mcp-design.md`: MCP設計の新情報
+              - `skill-design.md`: スキル設計の新情報
+              - `cost-optimization.md`: コスト最適化の新情報
+              - `error-recovery.md`: エラーリカバリーの新情報
             - `docs/03_checklist.md` を今回の調査結果に基づいて更新する
+            - 変更のないファイルは更新しない
 
             ## 制約
             - エラーが発生した場合は changelog.md にエラー内容を記録する
@@ -81,6 +91,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add knowledge/ docs/
+          git add knowledge/ docs/ docs/patterns/
           git diff --cached --quiet || git commit -m "trend: $(date +'%Y-%m-%d') 週次調査"
           git push
