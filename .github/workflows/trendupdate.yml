@@ -70,14 +70,17 @@ jobs:
             - `knowledge/trends/latest.md` を今回のレポートで上書きする
             - `knowledge/changelog.md` に差分サマリーを追記する（形式: `## YYYY-MM-DD\n- 差分内容`）
 
+            ### 4. 設計パターン・チェックリストの更新
+            - `docs/02_design-patterns.md` を今回の調査結果に基づいて更新する（新しいパターン追加・古い情報の修正）
+            - `docs/03_checklist.md` を今回の調査結果に基づいて更新する
+
             ## 制約
-            - docs/ は変更しない
             - エラーが発生した場合は changelog.md にエラー内容を記録する
 
       - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add knowledge/
+          git add knowledge/ docs/
           git diff --cached --quiet || git commit -m "trend: $(date +'%Y-%m-%d') 週次調査"
           git push
