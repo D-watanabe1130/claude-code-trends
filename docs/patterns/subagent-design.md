@@ -1,6 +1,6 @@
 ---
 tags: [claude-code, subagent, design-pattern]
-updated: 2026-06-01
+updated: 2026-06-08
 ---
 
 # サブエージェント設計
@@ -89,4 +89,28 @@ tools: Agent(worker, researcher), Read, Bash
 | Plan | - | 実装計画作成 |
 | general-purpose | - | 汎用タスク |
 | statusline-setup | Sonnet | ステータスライン設定 |
+| output-style-setup | Sonnet | 出力スタイル設定 |
 | claude-code-guide | Haiku | Claude Code ガイド |
+| code-review | - | コードレビュー |
+
+## CLAUDE_CODE_SUBAGENT_MODEL （一括モデル変更）（v2.1.161+）
+
+```bash
+CLAUDE_CODE_SUBAGENT_MODEL=claude-haiku-4-5 claude  # 全サブエージェントをHaikuで実行
+```
+
+サブエージェントのデフォルトモデルを環境変数で一括オーバーライド。テスト時のコスト削減に有効。
+
+## CLAUDE_AUTOCOMPACT_PCT_OVERRIDE（圧縮しきい値変更）（v2.1.161+）
+
+```bash
+CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=80 claude  # コンテキストの80%で自動圧縮（デフォルト95%）
+```
+
+## /plugin list コマンド（v2.1.163+）
+
+```bash
+/plugin list            # インストール済プラグイン一覧
+/plugin list --enabled  # 有効なプラグインのみ
+/plugin list --disabled # 無効なプラグインのみ
+```

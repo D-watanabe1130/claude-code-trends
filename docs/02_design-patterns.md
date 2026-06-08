@@ -1,6 +1,20 @@
 # Claude Code 設計パターン集
 
-最終更新: 2026-06-08
+最終更新: 2026-06-08（第2回更新）
+
+## 直近の主要変更（2026-06-08 第2回）
+
+- **Opus 4.8 リリース**（v2.1.154）: デフォルト high エフォート、Fast Mode は2倍コスト→2.5倍速、`/effort xhigh` で最大精度
+- **ダイナミックワークフロー**（v2.1.154）: `ultracode` キーワードで数十〜数百のバックグラウンドエージェントを並列実行、`/workflows` コマンド、`.claude/workflows/` ディレクトリ
+- **fallbackModel 設定**（v2.1.166）: プライマリモデル障害時のフォールバック最大3つ、`--fallback-model` CLIフラグ
+- **requiredMinimumVersion/MaxVersion**（v2.1.163）: 組織管理者がバージョン範囲を強制（エンタープライズ管理）
+- **Stop フックの additionalContext**（v2.1.163）: ブロックだけでなくClaudeへのフィードバックとして機能
+- **glob deny ルール**（v2.1.166）: `"*"` で全ツール拒否などglobパターンをdenyルールに利用可能
+- **SendMessage セキュリティ強化**（v2.1.166）: クロスセッションの権限リクエストを拒否、Auto モードでリレーブロック
+- **MAX_THINKING_TOKENS=0**（v2.1.166）: デフォルト思考モデルでの思考無効化によるコスト削減
+- **`.claude/skills` 自動ロード**（v2.1.157）: プラグインマーケットプレイス不要でローカルプラグインを自動ロード
+- **Auto Mode の拡大**（v2.1.158）: Bedrock/Vertex/Foundry でも利用可能（`CLAUDE_CODE_ENABLE_AUTO_MODE=1` でオプトイン）
+- **コミュニティエコシステム全体像判明**（初回GitHub取得）: 主要ワークフロー13個、クロスモデルワークフロー新カテゴリ（Router/Plugin/MCP型）
 
 ## アーキテクチャパターン
 
@@ -866,3 +880,49 @@ claude -p "fix lint errors" \
   --allowedTools "Edit,Bash(npm run lint)" \
   --permission-mode auto
 ```
+
+### ダイナミックワークフロー（v2.1.154+）
+
+数十〜数百のバックグラウンドエージェントを並列オーケストレーション。
+
+```bash
+/effort ultracode  # ダイナミックワークフローをトリガー
+/workflows         # ワークフロー一覧
+```
+
+- `.claude/workflows/` ディレクトリでワークフローを管理
+- Deep Research などのバンドルワークフローが利用可能
+
+---
+
+## フォールバック・信頼性設計
+
+### fallbackModel 設定（v2.1.166+）
+
+```json
+{
+  "fallbackModel": ["claude-sonnet-4-5", "claude-haiku-4-5"]
+}
+```
+
+- プライマリモデル障害時にフォールバック（最大3つ）
+- `--fallback-model` CLIフラグでインタラクティブセッションにも適用
+- 非リトライ可能なAPIエラー時に自動的に1回リトライ
+
+### MAX_THINKING_TOKENS によるコスト制御（v2.1.166+）
+
+```bash
+MAX_THINKING_TOKENS=0 claude    # 思考を無効化（コスト削減）
+--thinking disabled              # CLIフラグでも可
+```
+
+### エンタープライズバージョン管理（v2.1.163+）
+
+```json
+{
+  "requiredMinimumVersion": "2.1.150",
+  "requiredMaximumVersion": "2.1.200"
+}
+```
+
+managed-settings に設定。バージョン範囲外の Claude Code は起動を拒否する。

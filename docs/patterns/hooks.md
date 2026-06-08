@@ -1,6 +1,6 @@
 ---
 tags: [claude-code, hooks, design-pattern]
-updated: 2026-06-01
+updated: 2026-06-08
 ---
 
 # フックパターン
@@ -78,3 +78,25 @@ exit code 2 で Claude を再起動。CIビルド監視・テスト完了待機�
 ### watchPaths（FileChanged監視登録）
 ### CLAUDE_ENV_FILE（環境変数永続化）
 ### terminalSequence（デスクトップ通知）
+
+## 2026-06-08+ の新機能
+
+### Stop/SubagentStop フックの additionalContext（v2.1.163+）
+ブロックだけでなく、フィードバックとしてClaudeを誘導できる。
+```json
+{
+  "hookSpecificOutput": {
+    "hookEventName": "Stop",
+    "additionalContext": "Tests failed: 3 errors. Please fix before finishing."
+  }
+}
+```
+
+### glob パターンの deny ルール（v2.1.166+）
+deny ルールのツール名位置で `"*"` など glob パターンがサポートされた。
+```json
+{ "deniedTools": ["*"] }
+```
+
+### SendMessage セキュリティ強化（v2.1.166+）
+他のセッションから SendMessage でリレーされたメッセージはユーザー権限を持たない。Auto モードではリレーメッセージをブロック。

@@ -30,6 +30,60 @@
 - `docs/02_design-patterns.md`: フォーク・Agentチーム・/agents・サブエージェントメモリ等を追記
 - `docs/03_checklist.md`: 新機能チェック項目追加（2026-05-25時点）
 
+## 2026-06-08（第5回調査）
+
+今回はGitHub CHANGELOG（v2.1.168まで）とコミュニティREADME（shanraisshan/claude-code-best-practice）を初めて正常取得できた。公式ドキュメント（SPA）は引き続き取得不可。最大の発見は **Opus 4.8 リリース**（v2.1.154）で、デフォルト high エフォートで動作し Fast Mode は 2.5倍速/2倍コストを実現。**ダイナミックワークフロー**（v2.1.154）は `ultracode` キーワードで数十〜数百のバックグラウンドエージェントを並列オーケストレーション。**fallbackModel**（v2.1.166）はプライマリモデル障害時のフォールバック最大3つを設定可能（本番信頼性向上）。**requiredMinimumVersion/MaxVersion**（v2.1.163）はエンタープライズバージョン管理を実現。Stop フックの **additionalContext**（v2.1.163）はブロックだけでなくClaudeへのフィードバックとして機能し品質ゲートの柔軟性が向上。セキュリティ面では SendMessage クロスセッション権限のブロック（v2.1.166）とシェルスタートアップファイルへの書き込み確認（v2.1.160）が追加。コミュニティではクロスモデルワークフロー（Router/Plugin/MCP型）という新カテゴリが確認された。
+
+### 更新ファイル
+- `knowledge/trends/2026-06-08.md`: トレンド調査レポート（第2回更新）
+- `knowledge/logs/latest.md`: 最新情報サマリー更新
+
+### 差分サマリー（15項目）
+- Opus 4.8 リリース（v2.1.154）
+- ダイナミックワークフロー・ultracode キーワード（v2.1.154）
+- fallbackModel 設定・--fallback-model フラグ（v2.1.166）
+- requiredMinimumVersion / requiredMaximumVersion（v2.1.163）
+- Stop/SubagentStop フックの additionalContext（v2.1.163）
+- スキルの `\$` エスケープ構文（v2.1.163）
+- `/plugin list` コマンド（v2.1.163）
+- `.claude/skills` 自動ロード + `claude plugin init`（v2.1.157）
+- `claude agents --json` の `waitingFor` フィールド（v2.1.162）
+- Bedrock/Vertex/Foundry の Auto Mode 対応（v2.1.158）
+- シェルスタートアップファイル書き込み確認（v2.1.160）
+- SendMessage クロスセッションセキュリティ強化（v2.1.166）
+- MAX_THINKING_TOKENS=0 で思考無効化（v2.1.166）
+- glob パターンの deny ルール（v2.1.166）
+- コミュニティ主要ワークフロー・クロスモデル統合の全体像（初回取得）
+
+---
+
+## 2026-06-08（第4回調査・初回）
+
+今週の調査では GitHub CHANGELOG と公式ドキュメント（SPA）を調査した。公式ドキュメントは引き続きcurlで取得不可。CHANGELOG（v2.1.163まで）から主要な変更を抽出。最大の発見は `/fork` コマンドのデフォルト有効化（v2.1.161）、Stop フックの決定論的ゲートパターン（最大8回ブロック）、MessageDisplay フックによるストリーミング中のテキスト変換、Agent フック型（実験的）によるフックからのサブエージェントスポーン。
+
+### 更新ファイル
+- `knowledge/trends/2026-06-08.md`: 初回 
+- `knowledge/logs/latest.md`: 最新情報サマリー更新
+- `docs/02_design-patterns.md`: フォーク詳細・Stop/MessageDisplay/Agentフックパターン追記
+- `docs/03_checklist.md`: 2026-06-08時点の新機能チェック項目追加
+
+---
+
+## 2026-06-01（第4回調査）
+
+今週の調査では GitHub CHANGELOG と公式ドキュメント（SPA）を調査した。最大の発見はビルトインサブエージェント7種の正式確認（Explore/Plan/general-purpose/statusline-setup/output-style-setup/claude-code-guide/code-review）、`Setup` フックイベント（一回限り初期化）、`SessionStart` フックの高機能化（`sessionTitle`/`initialUserMessage`/`reloadSkills`）、`mcp_tool` タイプフックのMCPサーバーツール直接呼び出し、逆境的レビューパターン（Adversarial Review）の公式化。
+
+### 更新ファイル
+- `knowledge/trends/2026-06-01.md`: トレンド調査レポート
+- `knowledge/logs/latest.md`: 最新情報サマリー更新
+- `docs/patterns/subagent-design.md`: ビルトイン7種・CLIフラグ定義
+- `docs/patterns/hooks.md`: Setup/SessionStart高機能化/mcp_tool
+- その他 patterns/ 各ファイル更新
+- `docs/02_design-patterns.md`: 逆境的レビューパターン等追記
+- `docs/03_checklist.md`: 2026-06-01時点の新機能チェック項目追加
+
+---
+
 ## 2026-05-18（第2回調査）
 
 今週の調査では GitHub 外部リポジトリへのアクセスが失敗したため、公式ドキュメント（best-practices, sub-agents, hooks, memory）のみから差分を抽出した。最も重要な発見はフックシステムの大幅拡張で、PostToolBatch・SubagentStart/Stop・PermissionRequest/Denied・WorktreeCreate/Remove・Elicitation など約15種類のイベントが新たに文書化された。また、`asyncRewake: true`（バックグラウンドフックが exit code 2 で Claude を再起動）と `once: true`（セッション中1回のみ）という2つの新フックオプションも確認。CLAUDE.md 関連では AGENTS.md 相互運用ガイドの追加、HTMLコメントのコンテキスト自動除去（メンテナーメモをトークンを消費せずに残せる）、サブエージェントの独自 Auto Memory 対応が目立つ。新コマンドとして `/btw`（会話履歴に残らないサイドクエスチョン）と、`AskUserQuestion` ツールを使ったClaude によるインタビューパターンが公式ベストプラクティスに掲載された。
