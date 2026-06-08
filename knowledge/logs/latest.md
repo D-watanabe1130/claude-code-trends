@@ -1,58 +1,64 @@
 # 最新トレンド（直近調査）
 
-**調査日**: 2026-06-01
-**参照ファイル**: [2026-06-01.md](./2026-06-01.md)
+**調査日**: 2026-06-08
+**参照ファイル**: [2026-06-08.md](../trends/2026-06-08.md)
 
 ## 現在の最新バージョン
-- Claude Code: **v2.1.142以降**（CHANGELOG取得失敗のため詳細不明）
-- Auto Memory 最低必要バージョン: **v2.1.59**（公式ドキュメントで明記）
-- Fast Mode モデル: **Opus 4.7**
+- Claude Code: **v2.1.161+**（`/fork` コマンドのデフォルト有効化バージョン）
+- フォークサブエージェント 最低必要バージョン: **v2.1.117**
+- MCP制限のサブエージェント適用: **v2.1.153**
+- Task → Agent ツール改名: **v2.1.63**
+- Auto Memory 最低必要バージョン: **v2.1.59**
 
 ## 今週の主要変更
-1. **ビルトインサブエージェント2種追加が公式ドキュメントに明記**（`statusline-setup`: Sonnet、`claude-code-guide`: Haiku）
-2. **`--agents` CLIフラグ**（JSONでセッションスコープのサブエージェントを直接定義）
-3. **プラグインエージェントのスコープ識別子仕様確認**（`agents/` サブフォルダパスが識別子の一部に）
-4. **SessionStart フック新出力フィールド**（`sessionTitle`, `initialUserMessage`, `reloadSkills`）
-5. **`Setup` フックイベント**（`--init-only` フラグで一回限りの初期化）
-6. **`mcp_tool` フック型の詳細ドキュメント化**（MCPサーバーツールをフックから直接呼び出し）
-7. **フック並列実行と重複排除**（マッチしたフックは並列実行、同一ハンドラーは自動排除）
-8. **プロンプトフックに `model` フィールド追加**（使用モデル指定が可能に）
-9. **`${CLAUDE_PLUGIN_DATA}` パスプレースホルダー追加**（プラグイン永続データディレクトリ）
-10. **新環境変数3種**（`CLAUDE_CODE_DISABLE_AUTO_MEMORY`, `CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD`、`--append-system-prompt` CLIフラグ）
-11. **`claudeMd` 設定キー**（managed-settings.jsonにCLAUDE.md内容を直接埋め込み）
-12. **逆境的レビューパターン**（Adversarial Review）が公式ベストプラクティスに追加
-13. **`--add-dir` ディレクトリはサブエージェントスキャン対象外**であることが明確化
-14. **Explore/Planサブエージェント**: CLAUDE.mdとgit statusをスキップして実行（コスト削減）
+1. **`/fork` コマンドがデフォルト有効化**（v2.1.161+、以前は `CLAUDE_CODE_FORK_SUBAGENT=1` が必要）
+2. **Agent フック型**（実験的）: フックからサブエージェントを直接スポーンして検証
+3. **新規フックイベント10種+**: `MessageDisplay`, `Elicitation`, `ElicitationResult`, `TeammateIdle`, `WorktreeCreate`, `WorktreeRemove`, `PostCompact`, `StopFailure`, `TaskCreated`, `TaskCompleted`, `UserPromptExpansion`
+4. **Stop フックの決定論的ゲート仕様**（最大8回連続ブロック後に強制終了）
+5. **フックイベント別タイムアウトデフォルト**: `UserPromptSubmit` は30秒、`MessageDisplay` は10秒に短縮
+6. **フック入力に `agent_id` / `agent_type` / `CLAUDE_EFFORT`** フィールド追加
+7. **サブエージェントの自動圧縮**（95%でトリガー、`CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` でカスタマイズ）
+8. **新環境変数**: `CLAUDE_CODE_SUBAGENT_MODEL`, `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE`, `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS`
+9. **Managed Subagents**: 組織管理者が全ユーザー向けにサブエージェントを展開可能（優先度最高）
+10. **Task ツール → Agent ツール改名**（v2.1.63、`Task(...)` はエイリアスとして継続）
+11. **サブエージェントファイルの直接編集にはセッション再起動が必要**（`/agents` 経由は即時反映）
+12. **CLAUDE.md はシステムプロンプト後のユーザーメッセージとして注入**（アーキテクチャ明確化）
+13. **圧縮後のサバイバル仕様**: プロジェクトルートCLAUDE.mdは再注入、ネストCLAUDE.mdは非自動
+14. **公式失敗パターン文書化**: キッチンシンクセッション、過剰指定CLAUDE.md、無限探索など5パターン
+15. **`CLAUDE_CODE_NEW_INIT=1`** でインタラクティブな多段階 `/init` フロー
 
 ## ホットトピック
-- **ビルトインサブエージェントの全容**: 計7種（Explore, Plan, general-purpose, statusline-setup, claude-code-guide + Explore thoroughness levels）
-- **SessionStart フック高機能化**: セッション名・初期メッセージ・スキル再ロードをフックから制御
-- **Adversarial Reviewパターン**: 公式ベストプラクティスに追加された品質保証の新標準
-- **CLIサブエージェント定義**: `--agents` JSONでCI/CDへの統合が簡単に
-- **mcp_tool フック型**: MCPサーバーツールをフック内で直接使用可能
+- **フォーク正式化**: 実験的から本番デフォルトへ、パラレル実験の標準パターンに
+- **フックライフサイクルの完全体**: MessageDisplay/Elicitation/Worktree系 で企業級制御が可能に
+- **決定論的Stop フック**: テスト自動パスまでターン終了をブロック、最大8回制限で安全
+- **Managed Subagents**: 組織デプロイメント機能の成熟
+- **コンテキスト管理の精緻化**: CLAUDE.md注入方式・圧縮サバイバル仕様の明確化
 
-## 前回比較（2026-05-25 → 2026-06-01）
+## 前回比較（2026-06-01 → 2026-06-08）
 
-### 新規判明（14項目）
-- ビルトインサブエージェント `statusline-setup`（Sonnet）/ `claude-code-guide`（Haiku）の公式ドキュメント掲載
-- Explore/Plan が CLAUDE.md と git status をスキップする仕様の確認
-- `--agents` フラグによる JSON でのセッションスコープサブエージェント定義
-- プラグイン `agents/` サブフォルダパスが識別子に含まれる仕様
-- SessionStart フック: `sessionTitle`, `initialUserMessage`, `reloadSkills` フィールド
-- `Setup` フックイベント（`--init-only` フラグ連携）
-- `mcp_tool` フック型の詳細確認
-- フック並列実行と重複排除の公式確認
-- プロンプトフック `model` フィールド
-- `${CLAUDE_PLUGIN_DATA}` パスプレースホルダー
-- `CLAUDE_CODE_DISABLE_AUTO_MEMORY=1` 環境変数
-- `CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD=1` 環境変数
-- `claudeMd` managed-settings.jsonキー
-- Adversarial Review パターン（逆境的レビュー）の公式ベストプラクティス追加
+### 新規判明（主要18項目）
+- `/fork` コマンドのデフォルト有効化（v2.1.161+）
+- Agent フック型（実験的）
+- MessageDisplay フックイベント（displayContent でテキスト上書き可能）
+- Elicitation / ElicitationResult フックイベント（MCPサーバー入力要求の制御）
+- TeammateIdle / WorktreeCreate / WorktreeRemove フックイベント
+- PostCompact / StopFailure / TaskCreated / TaskCompleted / UserPromptExpansion フックイベント
+- フックイベント別タイムアウト短縮（UserPromptSubmit: 30秒、MessageDisplay: 10秒）
+- フック入力 `agent_id` / `agent_type` フィールド、`CLAUDE_EFFORT` 環境変数
+- サブエージェント自動圧縮（95%、CLAUDE_AUTOCOMPACT_PCT_OVERRIDE）
+- CLAUDE_CODE_SUBAGENT_MODEL 環境変数
+- CLAUDE_CODE_DISABLE_BACKGROUND_TASKS 環境変数
+- Managed Subagents（最高優先度）
+- Task → Agent ツール改名（v2.1.63）
+- サブエージェントファイル直接編集 → セッション再起動必要
+- CLAUDE.md のシステムプロンプト後ユーザーメッセージ注入仕様
+- 圧縮後サバイバル仕様（プロジェクトルート CLAUDE.md は再注入）
+- 公式ベストプラクティスへの5失敗パターン追加
+- CLAUDE_CODE_NEW_INIT=1 インタラクティブ init
 
 ### 変化なし
-- コアバージョン: v2.1.142（推定）
-- 基本ワークフロー（Explore→Plan→Implement→Commit）
-- サブエージェントの11フロントマターフィールド
-- Agent Teams / フォークモード / プラグイン機能
+- コアワークフロー（Explore→Plan→Implement→Commit）
+- サブエージェント基本フロントマター11フィールド
+- プラグイン機能
+- Agent Teams 実験的機能
 - Auto Memory 基本仕様（200行/25KB）
-- フックイベント30種（前回確定分）

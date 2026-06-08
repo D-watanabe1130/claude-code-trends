@@ -2,6 +2,12 @@
 
 ---
 
+## 2026-06-08
+
+公式ドキュメント（best-practices, sub-agents, hooks, memory）の詳細再調査により、前週比18項目以上の新規判明事項を記録。主な発見は：`/fork` コマンドが v2.1.161 からデフォルト有効化され実験的フラグが不要になったこと；新たなフック型 `"type": "agent"`（実験的）でフックからサブエージェントを直接スポーンできるようになったこと；`MessageDisplay`, `Elicitation`, `ElicitationResult`, `TeammateIdle`, `WorktreeCreate`, `WorktreeRemove`, `PostCompact`, `StopFailure`, `TaskCreated`, `TaskCompleted`, `UserPromptExpansion` の11以上の新規フックイベントが確認されたこと；`Stop` フックの「決定論的ゲート」仕様（最大8回連続ブロック後に強制終了）が明確化されたこと；`CLAUDE_CODE_SUBAGENT_MODEL` や `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` などの新環境変数が追加されたこと；CLAUDE.md がシステムプロンプト後のユーザーメッセージとして注入されるアーキテクチャが公式に明記されたこと；組織管理者が全ユーザー向けサブエージェントを展開できる Managed Subagents が確認されたこと。なお、GitHub系ソースはセッションのリポジトリスコープ制限により全て取得不可。
+
+---
+
 ## 2026-06-01
 
 公式ドキュメント（best-practices, sub-agents, hooks, memory）の調査により、前週比14項目の新規判明事項を記録。主な発見は：ビルトインサブエージェントとして `statusline-setup`（Sonnet）と `claude-code-guide`（Haiku）の2種が公式ドキュメントに追加され計7種のビルトインの全容が明確化されたこと；SessionStart フックに `sessionTitle`, `initialUserMessage`, `reloadSkills` の3フィールドが追加され自動化の幅が広がったこと；逆境的レビューパターン（Adversarial Review）が公式ベストプラクティスに追加され独立コンテキストでのサブエージェントレビューが推奨手法として位置づけられたこと；`--agents` CLIフラグによるJSONでのセッションスコープサブエージェント定義とCI/CD統合が容易になったこと。なお、GitHub系ソース（gh CLI）は環境に未インストールのため全て取得不可。
