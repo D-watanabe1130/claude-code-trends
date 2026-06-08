@@ -14,15 +14,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-        env:
-          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
       - name: Run trendupdate
         uses: anthropics/claude-code-action@beta
-        env:
-          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          mode: agent
           direct_prompt: |
             GitHubトレンドと公式ドキュメントの最新情報を取得し、knowledge/ を更新してください。
 
