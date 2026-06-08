@@ -1,5 +1,29 @@
 # ナレッジベース変更履歴
 
+## 2026-06-08（第6回調査・第3回更新）
+
+今回は公式ドキュメント（`best-practices.md`、`memory.md`、`agent-teams.md`、`agent-sdk/subagents.md`）をプレーンテキスト形式で初めて正常取得できた。また shanraisshan/claude-code-best-practice のコミュニティREADMEから Hot 機能一覧を取得した。CHANGELOG は前回から変化なし（v2.1.168 Bug fixes のみ）。
+
+主要発見は以下の通り:
+- **Ultrareview/Ultraplan (beta)**: マルチエージェント深掘りレビュー・計画機能が正式 beta 化
+- **Channels (beta)**: 外部イベント（CI結果、Slack通知等）をセッションにプッシュ
+- **No Flicker Mode (beta)**: `/tui fullscreen` でフリッカーフリーレンダリング
+- **Agent SDK AgentDefinition 完全フィールド**: `background`/`effort`/`permissionMode`/`initialPrompt`/`skills`（プリロード）/`disallowedTools` が公式ドキュメント化
+- **エージェントチーム専用フック**: `TeammateIdle`、`TaskCreated`、`TaskCompleted`（品質ゲート実装可能）
+- **Managed Policy CLAUDE.md**: `/Library/Application Support/ClaudeCode/CLAUDE.md` などで組織全ユーザーに強制適用
+- **`claudeMd` マネージドセッティングキー**: `managed-settings.json` 内に CLAUDE.md 内容を直接記述
+- **`CLAUDE_CODE_NEW_INIT=1`**: `/init` のインタラクティブマルチフェーズフロー
+- **CLAUDE.md 設計詳細**: 200行制限・HTMLコメント自動除去・`@path` インポート（4ホップ上限）・`claudeMdExcludes`・`.claude/rules/` パス限定ルール
+- **AGENTS.md 相互運用**: `@AGENTS.md` インポートまたはシンリンクで他エージェントと設定共有
+- **コスト最適化**: `AgentDefinition.model` でタスク別モデル（opus/sonnet/haiku）割り当てが標準パターン化
+- **品質ゲート3層**: Stop フック（決定論）+ `/goal`（自律継続）+ `additionalContext`（フィードバック）
+
+### 更新ファイル
+- `knowledge/logs/2026-06-08-3rd.md`: 第3回トレンド調査詳細レポート
+- `knowledge/logs/latest.md`: 最新情報サマリー更新
+
+---
+
 ## 2026-05-15（初回調査）
 
 ### 新規作成
