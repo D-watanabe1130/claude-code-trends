@@ -39,17 +39,16 @@ jobs:
             - `gh api repos/hesreallyhim/awesome-claude-code/contents/README.md --jq '.content' | base64 -d | head -200`
             - `gh api repos/anthropics/claude-code/contents/CHANGELOG.md --jq '.content' | base64 -d | head -300`
 
-            **公式ドキュメント（WebFetch）:**
-            - https://code.claude.com/docs/en/best-practices
-            - https://code.claude.com/docs/en/sub-agents
-            - https://code.claude.com/docs/en/hooks
-            - https://code.claude.com/docs/en/memory
-            - https://code.claude.com/docs/en/agent-sdk/overview
-            - https://code.claude.com/docs/en/agent-sdk/subagents
-            - https://code.claude.com/docs/en/agent-teams
-            - https://platform.claude.com/docs/en/managed-agents/overview
-            - https://code.claude.com/docs/en/mcp
-            - https://modelcontextprotocol.io/introduction
+            **公式ドキュメント（WebFetch — .md 形式で直接取得）:**
+            - https://code.claude.com/docs/en/best-practices.md
+            - https://code.claude.com/docs/en/subagents.md
+            - https://code.claude.com/docs/en/hooks.md
+            - https://code.claude.com/docs/en/memory.md
+            - https://code.claude.com/docs/en/agent-sdk/overview.md
+            - https://code.claude.com/docs/en/agent-sdk/subagents.md
+            - https://code.claude.com/docs/en/agent-teams.md
+            - https://code.claude.com/docs/en/mcp.md
+            - https://code.claude.com/docs/en/features-overview.md
 
             **AI オーケストレーション最適化（既存ソース + 公式ドキュメントから抽出）:**
             上記で取得した資料から AI オーケストレーションに関する記述を抽出する。
