@@ -1,5 +1,26 @@
 # ナレッジベース変更履歴
 
+## 2026-06-15（第8回調査・再調査）
+
+公式ドキュメント9種（best-practices/subagents/hooks/memory/agent-sdk-overview/agent-teams/mcp/features-overview）を追加取得。CHANGELOG 変化なし（v2.1.176 が最新）。
+
+主要な新規確認事項：
+- **Agent SDK 課金変更**（2026-06-15 施行）: サブスクリプションプランに月次 Agent SDK クレジット新設（インタラクティブ使用とは別枠）
+- **フックイベント全29種** の公式一覧確認（`PermissionDenied`/`UserPromptExpansion`/`PostToolBatch`/`MessageDisplay`/`TeammateIdle`/`InstructionsLoaded`/`ConfigChange`/`CwdChanged`/`FileChanged`/`Elicitation`/`ElicitationResult` 等を初めて網羅）
+- **Stop フック 8連続ブロック制限** の明文化（公式確認）
+- **Explore/Plan サブエージェントの CLAUDE.md スキップ** 仕様（コスト最適化設計）
+- **エージェントチームの計画承認フロー**（リード承認必須モード）詳細
+- **CLAUDE.md のHTMLコメント自動除去** 機能
+- **`CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD`** 環境変数 / **`claudeMdExcludes`** 設定
+- **MCP stdio サーバーの `CLAUDE_PROJECT_DIR`** 自動設定 / **WebSocket (`ws`) サポート**
+- **クロスモデルワークフロー4種**（Router/Plugin/MCP 型）の体系化
+
+### 更新ファイル
+- `knowledge/logs/2026-06-15.md`: 第8回トレンド調査詳細レポート（上書き）
+- `knowledge/logs/latest.md`: 最新情報サマリー更新
+
+---
+
 ## 2026-06-15（第7回調査）
 
 CHANGELOG（v2.1.176まで）・公式ドキュメント4種・コミュニティリポジトリ3種を正常取得。前回（v2.1.168）から8バージョン分の更新を記録。最大の発見は **Claude Fable 5 の登場**（v2.1.170、"Mythos-class model"）と **サブエージェントの5段階ネスト対応**（v2.1.172）で、マルチエージェント設計の可能性が大幅に拡大した。その他の主要発見は：`enforceAvailableModels` マネージド設定でデフォルトモデルを制限可能に（v2.1.175）；セッションタイトルが会話言語に合わせて自動生成されるように（v2.1.176）；Bedrock 認証情報キャッシュが固定1時間から実際の有効期限まで有効になった（v2.1.176）。公式ドキュメントからは `/sandbox` コマンド（OS レベルのファイル/ネットワーク分離・パーミッションプロンプト ~84% 削減）、`/loop` と `/schedule` コマンド（ローカル/クラウド定期タスク）、`<important if="...">` CLAUDE.md タグ（ドメイン特化ルールの無視防止）、コンテキスト劣化の具体的しきい値（300-400k トークン・30%以下維持推奨）が初めて記録された。コミュニティではセキュリティリスクが顕在化し、FlorianBruniaux ガイドが28件の CVE と655件の悪意あるスキルを追跡している。awesome-claude-code は大規模リオーガニゼーション中で詳細取得不可。
