@@ -2,6 +2,12 @@
 
 ---
 
+## 2026-06-15
+
+CHANGELOG（v2.1.176まで）・公式ドキュメント4種・コミュニティリポジトリ3種の完全取得に成功し、前回（v2.1.168）から8バージョン分の更新を記録。最大の発見は **Claude Fable 5 の登場**（v2.1.170、"Mythos-class model"）と **サブエージェントの5段階ネスト対応**（v2.1.172）。また `/sandbox` コマンド（OS レベル分離・パーミッションプロンプト約84%削減）・`/loop` と `/schedule`（定期タスク）・`<important if="...">` CLAUDE.md タグ・コンテキスト劣化の具体的しきい値（30%以下維持推奨・300-400k トークンで劣化）など、公式ドキュメントから複数の未記録機能が判明した。セキュリティ面ではコミュニティが28件の CVE と655件の悪意あるスキルを追跡しており、MCP ソース審査の重要性が増している。
+
+---
+
 ## 2026-06-08
 
 公式ドキュメント（best-practices, sub-agents, hooks, memory）の詳細再調査により、前週比18項目以上の新規判明事項を記録。主な発見は：`/fork` コマンドが v2.1.161 からデフォルト有効化され実験的フラグが不要になったこと；新たなフック型 `"type": "agent"`（実験的）でフックからサブエージェントを直接スポーンできるようになったこと；`MessageDisplay`, `Elicitation`, `ElicitationResult`, `TeammateIdle`, `WorktreeCreate`, `WorktreeRemove`, `PostCompact`, `StopFailure`, `TaskCreated`, `TaskCompleted`, `UserPromptExpansion` の11以上の新規フックイベントが確認されたこと；`Stop` フックの「決定論的ゲート」仕様（最大8回連続ブロック後に強制終了）が明確化されたこと；`CLAUDE_CODE_SUBAGENT_MODEL` や `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` などの新環境変数が追加されたこと；CLAUDE.md がシステムプロンプト後のユーザーメッセージとして注入されるアーキテクチャが公式に明記されたこと；組織管理者が全ユーザー向けサブエージェントを展開できる Managed Subagents が確認されたこと。なお、GitHub系ソースはセッションのリポジトリスコープ制限により全て取得不可。
