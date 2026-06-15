@@ -10,7 +10,7 @@ GitHubトレンドと公式ドキュメントの最新情報を取得し、設�
 ## 手順
 
 ### 1. 前回調査の確認
-`~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Vault/research/trendupdate/latest.md` を読み込んで前回との差分検出基準を把握する。
+`~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Vault/research/claude-core-settings/latest.md` を読み込んで前回との差分検出基準を把握する。
 
 ### 2. 並列調査
 以下のソースを**同時に**調査する（gh CLI + WebFetch）:
@@ -114,9 +114,21 @@ AI オーケストレーションとして特に抽出すべき概念:
 
 ### 3. 差分検出・記録
 - 前回調査との差分を検出する
-- `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Vault/research/trendupdate/logs/YYYY-MM-DD.md` に詳細レポートを保存する（日本語）
-- `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Vault/research/trendupdate/logs/latest.md` を更新する
-- `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Vault/research/trendupdate/logs/changelog.md` に差分サマリーを追記する
+- `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Vault/research/claude-core-settings/logs/YYYY-MM-DD.md` に詳細レポートを保存する（日本語）
+- `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Vault/research/claude-core-settings/logs/latest.md` を更新する
+- `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Vault/research/claude-core-settings/logs/changelog.md` に差分サマリーを追記する
+
+**新規ファイル作成時は必ず以下の frontmatter を付与する（`rules/tagging.md`・`rules/groups.md` 準拠）：**
+
+```yaml
+---
+tags: [ClaudeCode, トレンド調査]   # changelog.md は [ClaudeCode, 変更履歴]
+updated: YYYY-MM-DD
+groups:
+  - group/folder/research
+  - group/sub/claude-core-settings
+---
+```
 
 ### 4. 更新案提示・承認フロー
 - `docs/02_design-patterns.md`（インデックス）と `docs/patterns/` 配下の各ファイルの更新案を提示する
@@ -128,9 +140,9 @@ AI オーケストレーションとして特に抽出すべき概念:
 承認・push 後に git リポジトリの `docs/patterns/` を Vault へ同期する：
 ```bash
 cp ~/.claude/skills/trendupdate/docs/patterns/*.md \
-  ~/Library/Mobile\ Documents/iCloud~md~obsidian/Documents/Vault/research/trendupdate/patterns/
+  ~/Library/Mobile\ Documents/iCloud~md~obsidian/Documents/Vault/research/claude-core-settings/patterns/
 cp ~/.claude/skills/trendupdate/docs/02_design-patterns.md \
-  ~/Library/Mobile\ Documents/iCloud~md~obsidian/Documents/Vault/research/trendupdate/design-patterns.md
+  ~/Library/Mobile\ Documents/iCloud~md~obsidian/Documents/Vault/research/claude-core-settings/design-patterns.md
 ```
 
 ## 制約
@@ -140,6 +152,6 @@ MUST NOT: 承認なしに自動上書きする
 
 ## ナレッジベース
 
-- Obsidian Vault: `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Vault/research/trendupdate/`
+- Obsidian Vault: `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Vault/research/claude-core-settings/`
 - リモート: https://github.com/D-watanabe1130/claude-code-trends
 - 週次スケジュールタスク（月曜 9:00 自動実行）が Vault に直接書き込む
