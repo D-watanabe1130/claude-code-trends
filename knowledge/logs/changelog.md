@@ -1,5 +1,30 @@
 # ナレッジベース変更履歴
 
+## 2026-06-22（第9回調査）
+
+GitHub CHANGELOG（v2.1.185 まで）・公式ドキュメント9種・コミュニティリポジトリ3種を取得。前回（v2.1.176）から9バージョン分の更新を記録。
+
+主要な新規確認事項：
+- **Claude Code v2.1.185 が最新**（v2.1.176 → v2.1.185、9バージョン更新）
+- **Auto Mode 安全強化**（v2.1.183）: 破壊的 git コマンド（`git reset --hard`/`git checkout -- .`/`git clean -fd`/`git stash drop`）・`terraform destroy`/`pulumi destroy`/`cdk destroy` を自動ブロック
+- **`/config key=value` 構文**（v2.1.181）: プロンプトから任意設定を変更（`/config thinking=false` 等）
+- **エージェントチーム仕様変更**（v2.1.178）: `TeamCreate`/`TeamDelete` ツール廃止、暗黙チームが自動作成、Agent ツールの `name` パラメータで直接スポーン
+- **`Tool(param:value)` パーミッション構文**（v2.1.178）: `Agent(model:opus)` でモデル別コスト制御が可能に
+- **Workflow プロンプトキーワード制限**（v2.1.178）: "run a workflow" 等の明示フレーズのみトリガー
+- **`attribution.sessionUrl` 設定**（v2.1.183）: コミット/PR からセッションリンクを省略
+- **`sandbox.allowAppleEvents`**（v2.1.181）・**`CLAUDE_CLIENT_PRESENCE_FILE`**（v2.1.181）新設
+- **フックイベント32種**（前回29種から完全一覧を再確認）
+- **公式 best-practices.md の記述基準表**: CLAUDE.md に含める/除外する内容を表形式で明確化
+- **段階的セットアップ8トリガー**: CLAUDE.md → Skill → MCP → Subagent → Hook → Plugin の移行判断基準
+- **コミュニティ Hot 機能一覧**: Ultrareview/Ultraplan/Channels/Advisor/Auto Mode/Computer Use/Routines 等を初記録
+
+### 更新ファイル
+- `knowledge/logs/2026-06-22.md`: 第9回トレンド調査詳細レポート（新規作成）
+- `knowledge/logs/latest.md`: 最新情報サマリー更新
+- `knowledge/logs/changelog.md`: 本エントリ追記
+
+---
+
 ## 2026-06-15（第8回調査・再調査）
 
 公式ドキュメント9種（best-practices/subagents/hooks/memory/agent-sdk-overview/agent-teams/mcp/features-overview）を追加取得。CHANGELOG 変化なし（v2.1.176 が最新）。
