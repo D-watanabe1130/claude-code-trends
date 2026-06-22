@@ -1,6 +1,16 @@
 # Claude Code 設計パターン集
 
-最終更新: 2026-06-15
+最終更新: 2026-06-22
+
+## 直近の主要変更（2026-06-22）
+
+- **スキル・プラグインが公式ベストプラクティスの中核機能に格上げ**（SKILL.md フォーマット・`disable-model-invocation: true` の公式推奨）
+- **フックプレースホルダー変数の明文化**（`${CLAUDE_PROJECT_DIR}`・`${CLAUDE_PLUGIN_ROOT}`・`${CLAUDE_PLUGIN_DATA}`）
+- **フック5タイプの完全ドキュメント確認**（command/http/mcp_tool/prompt/agent）
+- **JSON 出力フォーマット詳細**（`additionalContext`・`suppressOutput`・`permissionDecision` 等）
+- **Auto Mode の非インタラクティブ時 abort 仕様**（`-p` フラグ時、繰り返しブロックで自動中断）
+- **`/goal` 条件の仕様詳細**（別の評価エージェントが毎ターン後に条件を再チェック）
+- **`/rewind` の2モード区別**（"Summarize from here" vs "Summarize up to here"）
 
 ## 直近の主要変更（2026-06-15）
 
@@ -1063,3 +1073,107 @@ MAX_THINKING_TOKENS=0 claude    # 思考を無効化（コスト削減）
 ```
 
 managed-settings に設定。バージョン範囲外の Claude Code は起動を拒否する。
+
+---
+
+## フックプレースホルダー変数パターン（2026-06-22 確認）
+
+プラグイン開発・フック設定でパス解決に使用する公式変数:
+
+| 変数 | 内容 |
+|------|------|
+| `${CLAUDE_PROJECT_DIR}` | プロジェクトルートの絶対パス |
+| `${CLAUDE_PLUGIN_ROOT}` | プラグインのインストールディレクトリ |
+| `${CLAUDE_PLUGIN_DATA}` | プラグインの永続データディレクトリ（セッション間で保持） |
+
+```json
+{
+  "type": "command",
+  "command": "node",
+  "args": ["${CLAUDE_PLUGIN_ROOT}/script.js", "${CLAUDE_PROJECT_DIR}/target"]
+}
+```
+
+プラグイン内のスクリプトを参照する際は `${CLAUDE_PLUGIN_ROOT}`、プラグインが状態を保持する際は `${CLAUDE_PLUGIN_DATA}` を使う。
+
+---
+
+## フック JSON 出力 `additionalContext` パターン（2026-06-22 確認）
+
+`PostToolUse` や `Stop` フックから Claude にシステムリマインダーを注入する:
+
+```json
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PostToolUse",
+    "additionalContext": "このファイルは生成済み。直接編集せず src/schema.ts を変更すること"
+  }
+}
+```
+
+- エラーとしてブロックせず、Claude へのコンテキスト情報としてターンを継続できる
+- `Stop` フックの場合はフィードバック付きで Claude を再起動するパターンに活用
+
+---
+
+## スキル vs CLAUDE.md のオフロードパターン（2026-06-22 確認）
+
+| 情報の種類 | 置き場所 | 読み込みタイミング |
+|-----------|---------|-----------------|
+| 毎回必要なコンベンション・ビルドコマンド | `CLAUDE.md` | 毎セッション常時 |
+| 繰り返しのワークフロー手順 | `.claude/skills/` | オンデマンド（呼び出し時のみ） |
+| コードベースの一部にしか関係しない知識 | `.claude/rules/*.md`（`paths` frontmatter） | 該当ファイル操作時のみ |
+| タスク固有の参照資料 | スキル | オンデマンド |
+
+**判断基準:** CLAUDE.md からある行を削除して「Claude がその行なしに間違いを犯すか」と問い、犯さないなら削除するかスキルへ移動する。
+
+```markdown
+# .claude/skills/fix-issue/SKILL.md
+---
+name: fix-issue
+description: Fix a GitHub issue end-to-end
+disable-model-invocation: true
+---
+1. `gh issue view $ARGUMENTS` で詳細確認
+2. 関連ファイルを検索・修正
+3. テスト実行
+4. コミット＆PR 作成
+```
+
+`disable-model-invocation: true` → `/fix-issue 1234` で明示的に呼び出す専用ワークフロー。
+
+---
+
+## Auto Mode の非インタラクティブ abort パターン（2026-06-22 確認）
+
+CI/CD パイプラインで auto mode を使う場合の注意事項:
+
+```bash
+claude --permission-mode auto -p "fix all lint errors"
+```
+
+**重要:** `-p`（非インタラクティブ）と `auto` を組み合わせた場合、分類モデルが繰り返しブロックすると**自動的に中断（abort）**する。ユーザーへのフォールバックができないため。
+
+対処法:
+1. `--allowedTools` で事前に許可ツールを明示する（分類モデルのブロックを減らす）
+2. ブロックされたアクションを事前に確認し、プロンプトを調整する
+3. 完全自動化が必要なタスクは、スコープを絞って auto mode が介入しにくくする
+
+---
+
+## `/goal` 条件パターン（詳細仕様 2026-06-22 確認）
+
+```text
+/goal all tests pass and no lint errors
+```
+
+- **別の評価エージェント**がターン終了のたびに条件を再チェック
+- 条件を満たすまで Claude が自動で作業を継続
+- Stop フックとの違い: Stop フックはスクリプト実行（決定論的）、`/goal` は LLM による評価（柔軟）
+
+**使い分け:**
+| 条件 | `/goal` | `Stop` フック |
+|------|---------|-------------|
+| "全テストが通過" のような自然言語条件 | ✅ 向いている | ❌ スクリプトでの評価が難しい |
+| "exit code 0" のような確定的条件 | △ 可能だが重い | ✅ 向いている |
+| 未監視の長時間実行 | ✅ 向いている | ✅ 向いている（最大8回） |
