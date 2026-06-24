@@ -10,7 +10,7 @@ GitHubトレンドと公式ドキュメントの最新情報を取得し、設�
 ## 手順
 
 ### 1. 前回調査の確認
-`~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Vault/research/claude-core-settings/latest.md` を読み込んで前回との差分検出基準を把握する。
+`~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Vault/research/claude-core-settings/logs/latest.md` を読み込んで前回との差分検出基準を把握する。
 
 ### 2. 並列調査
 以下のソースを**同時に**調査する（gh CLI + WebFetch）:
@@ -22,16 +22,16 @@ GitHubトレンドと公式ドキュメントの最新情報を取得し、設�
 - `gh api repos/anthropics/claude-code/contents/CHANGELOG.md --jq '.content' | base64 -d | head -300`
 
 **公式ドキュメント（WebFetch）:**
-- https://code.claude.com/docs/en/best-practices
-- https://code.claude.com/docs/en/sub-agents
-- https://code.claude.com/docs/en/hooks
-- https://code.claude.com/docs/en/memory
+- https://code.claude.com/docs/en/best-practices.md
+- https://code.claude.com/docs/en/subagents.md
+- https://code.claude.com/docs/en/hooks.md
+- https://code.claude.com/docs/en/memory.md
 
 **Agent SDK / Managed Agents（WebFetch）:**
-- https://code.claude.com/docs/en/agent-sdk/overview
-- https://code.claude.com/docs/en/agent-sdk/subagents
-- https://code.claude.com/docs/en/agent-teams
-- https://code.claude.com/docs/en/agent-view
+- https://code.claude.com/docs/en/agent-sdk/overview.md
+- https://code.claude.com/docs/en/agent-sdk/subagents.md
+- https://code.claude.com/docs/en/agent-teams.md
+- https://code.claude.com/docs/en/agent-view.md
 - https://platform.claude.com/docs/en/managed-agents/overview
 
 Agent SDK 調査で特に抽出すべき概念:
@@ -47,7 +47,7 @@ Managed Agents 調査で特に抽出すべき概念:
 - プロトタイプ → 本番移行のパス
 
 **MCP 設計パターン（WebFetch）:**
-- https://code.claude.com/docs/en/mcp
+- https://code.claude.com/docs/en/mcp.md
 - https://modelcontextprotocol.io/introduction
 - `gh api repos/modelcontextprotocol/servers/contents/README.md --jq '.content' | base64 -d | head -200`（公式 MCP サーバー一覧）
 
@@ -67,7 +67,7 @@ MCP 設計で特に抽出すべき概念:
 - Fast Mode（Opus 高速化）の活用場面
 
 **CLAUDE.md 設計ベストプラクティス（既存ソース + 公式ドキュメントから抽出）:**
-- https://code.claude.com/docs/en/memory
+- https://code.claude.com/docs/en/memory.md
 - 既存調査ソース（best-practice・awesome-claude-code 等）から CLAUDE.md に関する記述を抽出
 
 CLAUDE.md 設計として特に抽出すべき概念:
@@ -78,8 +78,8 @@ CLAUDE.md 設計として特に抽出すべき概念:
 - チームで共有する場合の注意点
 
 **AI オーケストレーション最適化（既存ソース + 公式ドキュメントから抽出）:**
-- https://code.claude.com/docs/en/agent-teams
-- https://code.claude.com/docs/en/agent-sdk/overview
+- https://code.claude.com/docs/en/agent-teams.md
+- https://code.claude.com/docs/en/agent-sdk/overview.md
 - 既存調査ソースから AI オーケストレーションに関する記述を抽出
 
 AI オーケストレーションとして特に抽出すべき概念:
@@ -90,11 +90,11 @@ AI オーケストレーションとして特に抽出すべき概念:
 - コスト最適化（どのタスクにどのモデルを割り当てるか）
 
 **スキル設計思想（既存ソース + 公式ドキュメントから抽出）:**
-- https://code.claude.com/docs/en/skills（存在する場合）
+- https://code.claude.com/docs/en/skills.md（存在する場合）
 - 既存調査ソース（awesome-claude-code・best-practice 等）からスキル設計に関する記述を抽出
 
 **エラーリカバリー・冪等性（既存ソース + 公式ドキュメントから抽出）:**
-- https://code.claude.com/docs/en/agent-sdk/overview（エラーハンドリング関連）
+- https://code.claude.com/docs/en/agent-sdk/overview.md（エラーハンドリング関連）
 - 既存調査ソースからエラー設計に関する記述を抽出
 
 エラーリカバリー・冪等性として特に抽出すべき概念:
@@ -115,7 +115,28 @@ AI オーケストレーションとして特に抽出すべき概念:
 ### 3. 差分検出・記録
 - 前回調査との差分を検出する
 - `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Vault/research/claude-core-settings/logs/YYYY-MM-DD.md` に詳細レポートを保存する（日本語）
-- `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Vault/research/claude-core-settings/logs/latest.md` を更新する
+- `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Vault/research/claude-core-settings/logs/latest.md` を以下のフォーマットで**全文置換**する（詳細レポートの全文コピー禁止。前回から変化した上位10項目のみ箇条書き）:
+
+```markdown
+---
+tags: [ClaudeCode, トレンド調査]
+updated: YYYY-MM-DD
+groups:
+  - group/folder/research
+  - group/sub/claude-core-settings
+---
+
+# 最新トレンド（直近調査）
+
+→ 詳細は [[YYYY-MM-DD]] を参照
+
+## 要点（YYYY-MM-DD）
+
+- **vX.X.X（最新）**: 主な変更点
+- **機能名**: 概要
+（変化した上位10項目のみ）
+```
+
 - `~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Vault/research/claude-core-settings/logs/changelog.md` に差分サマリーを追記する
 
 **新規ファイル作成時は必ず以下の frontmatter を付与する（`rules/tagging.md`・`rules/groups.md` 準拠）：**
