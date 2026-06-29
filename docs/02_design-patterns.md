@@ -1,6 +1,15 @@
 # Claude Code 設計パターン集
 
-最終更新: 2026-06-22
+最終更新: 2026-06-29
+
+## 直近の主要変更（2026-06-29）
+
+- **Artifacts機能（ベータ）の公式確認**: セッション出力をプライベートWebページとして公開。Team/Enterpriseプランのみ。`Ctrl+]`で再オープン。
+- **Code intelligence（LSP Tool）がExtension公式カテゴリに昇格**: コードインテリジェンスプラグインによるシンボルナビゲーション・ライブ型エラー。
+- **`skillOverrides`設定の追加**: ファイル編集なしでスキル可視性をオーバーライド可能。
+- **MCP tool search デフォルト有効**: アイドルMCPツールのコンテキスト消費を最小化。
+- **features-overview大幅更新**: 機能ごとのコンテキストコスト表・ロードタイミング図が公式ドキュメントに追加。
+- **並列化オプション3段階明確化**: Subagents / Background agents（agent-view）/ Agent teams が公式に区分。
 
 ## 直近の主要変更（2026-06-22）
 
@@ -1158,6 +1167,109 @@ claude --permission-mode auto -p "fix all lint errors"
 1. `--allowedTools` で事前に許可ツールを明示する（分類モデルのブロックを減らす）
 2. ブロックされたアクションを事前に確認し、プロンプトを調整する
 3. 完全自動化が必要なタスクは、スコープを絞って auto mode が介入しにくくする
+
+---
+
+---
+
+## Artifacts パターン（ベータ）（2026-06-29 確認）
+
+セッション出力をプライベートWebページとして公開する（Team/Enterprise プランのみ）。
+
+```text
+# PR レビューアーティファクト
+Make an artifact that walks through this PR. Render the diff with margin annotations
+and color-code findings by severity.
+
+# 進捗トラッキング
+Turn this migration plan into a checklist artifact. Check items off as you complete them.
+
+# 比較表
+Make an artifact with four distinctly different layouts for the settings panel.
+```
+
+**操作:**
+- `Ctrl+]`: 最新アーティファクトをターミナルから再オープン
+- `CLAUDE_CODE_ARTIFACT_AUTO_OPEN=0`: 自動ブラウザ起動を無効化
+
+**設定:**
+```json
+{ "disableArtifact": true }
+```
+または環境変数: `CLAUDE_CODE_DISABLE_ARTIFACT=1`
+
+**制約:**
+- CSPにより外部リクエスト・バックエンド不可（静的ページのみ）
+- サイズ上限 16 MiB
+- ソースは `.html`, `.htm`, `.md` のみ
+- Anthropic API のみ（Bedrock/Vertex/Foundry 不可）
+- `/login` でサインイン必須
+
+**コスト削減:**
+- ラスター画像の代わりにSVGやHTML/CSSを使う
+- 大規模データセットは全インラインではなく要約を表示
+
+---
+
+## skillOverrides によるスキル可視性制御（2026-06-29 確認）
+
+スキルファイルを編集せずに設定ファイルからスキルの可視性をオーバーライドできる:
+
+```json
+{
+  "skillOverrides": {
+    "my-heavy-skill": { "modelInvocable": false }
+  }
+}
+```
+
+- `modelInvocable: false` = `disable-model-invocation: true` と同等の効果
+- ファイル編集権限のないプラグイン提供スキルに対して有効
+- コンテキストコストをゼロにしたいが手動呼び出しは維持したい場合に使用
+
+---
+
+## MCP Tool Search による コンテキスト最小化（2026-06-29 確認）
+
+MCP tool search がデフォルト有効になり、アイドル中のMCPツールはコンテキストを最小限しか消費しない:
+
+```
+/mcp    # 接続状態とトークンコストを確認
+```
+
+不要なMCPサーバーを切断する（接続したままでもtool searchでコスト削減可能だが、使わないなら切断が確実）。
+
+---
+
+## 機能ごとのコンテキストコスト設計（2026-06-29 確認）
+
+| 機能 | ロードタイミング | コンテキストコスト |
+|------|----------------|-----------------|
+| CLAUDE.md | セッション開始時に全内容 | 毎リクエスト消費 |
+| スキル（modelInvocable=true） | 開始時にdescription、使用時にフルコンテンツ | description分が常時 |
+| スキル（modelInvocable=false） | 手動呼び出し時のみ | ゼロ（呼び出しまで） |
+| MCPサーバー | 開始時にツール名、需要時にスキーマ | tool search有効ならほぼゼロ |
+| Code intelligence | ファイル編集後・オンデマンド | 低（ファイル読み込みを削減） |
+| サブエージェント | スポーン時（独立コンテキスト） | メインセッションから独立 |
+| フック | トリガー時（外部実行） | ゼロ（出力返却時のみ加算） |
+
+**設計原則:** 毎回必要でない情報はスキル（`disable-model-invocation: true`）または `.claude/rules/`（pathsフィルタ付き）に置く。
+
+---
+
+## 並列化オプション選択パターン（2026-06-29 確認）
+
+| 種別 | ドキュメント | 特徴 | 使い所 |
+|------|------------|------|-------|
+| **Subagents** | `/en/sub-agents` | セッション内で実行、結果をメインに返す | 探索タスク・コンテキスト隔離 |
+| **Background agents** | `/en/agent-view` | 複数の独立セッションを並列実行・監視 | 独立したタスクの大規模並列化 |
+| **Agent teams** | `/en/agent-teams` | セッション間でP2Pメッセージ通信 | 複雑な協調・競合仮説・実験的 |
+
+```
+# 移行パス（コンテキスト限界に達したら）
+Subagents → Agent teams（サブエージェントが互いに通信する必要が出たとき）
+Background agents → Agent teams（セッション間の協調が必要になったとき）
+```
 
 ---
 

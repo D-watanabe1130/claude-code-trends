@@ -2,6 +2,12 @@
 
 ---
 
+## 2026-06-29
+
+公式ドキュメント6種（best-practices/sub-agents/hooks/memory/features-overview/artifacts）を取得。外部GitHubソースはMCPスコープ制限により今週も取得不可。最大の新規判明事項は**Artifacts機能（ベータ）の公式ドキュメント確認**。Team/Enterpriseプランで、セッション出力をプライベートWebページとして`claude.ai`に公開・組織内共有できる機能で、`Ctrl+]`で再オープン、`CLAUDE_CODE_ARTIFACT_AUTO_OPEN=0`で自動起動を無効化、Compliance APIで組織管理が可能。また**Code intelligence（LSPツール）がExtensionの公式カテゴリに昇格**し、コードインテリジェンスプラグインによるシンボルナビゲーションがファイル全読み込みに代わるコンテキスト節約手段として公式推奨になった。features-overviewページが大幅更新され**機能ごとのコンテキストコスト表とロードタイミング図**が追加、また`skillOverrides`設定によりファイル編集不要でスキル可視性を上書き可能になったことが確認された。さらに**Subagents / Background agents（agent-view）/ Agent teams の3並列化オプション**が公式に明確区分された。ウェブ検索ではsafe mode・`/cd`コマンド・post-session hookが報告されているが公式ドキュメントでの詳細は来週確認予定。
+
+---
+
 ## 2026-06-22
 
 公式ドキュメント4種（best-practices/sub-agents/hooks/memory）を取得。外部GitHubソースはMCPスコープ制限により今週も取得不可。最大の新規判明事項は**スキルとプラグインが公式ベストプラクティスの中核機能として明確に格上げ**されたこと。スキルは「オンデマンドロードでコンテキストを節約する再利用可能ワークフロー」として位置づけられ、CLAUDE.mdとの役割分担が公式に整理された。フック分野では5タイプ（command/http/mcp_tool/prompt/agent）の完全ドキュメントと、フックプレースホルダー変数（`${CLAUDE_PROJECT_DIR}` 等）および `additionalContext` を含む JSON 出力フォーマットが詳細明文化された。また Auto Mode を `-p` フラグと組み合わせた非インタラクティブ実行では、分類モデルが繰り返しブロックすると自動中断（abort）する仕様が確認された（CI/CDでの注意事項）。`/goal` 条件が「別の評価エージェントが毎ターン後に条件を再チェックする」仕組みであることも明文化された。

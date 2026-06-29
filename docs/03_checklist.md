@@ -1,6 +1,6 @@
 # Claude Code 設計チェックリスト
 
-最終更新: 2026-06-22
+最終更新: 2026-06-29
 
 ---
 
@@ -301,6 +301,36 @@
 - [ ] 大型機能の設計前に `AskUserQuestion` パターンでClaude にインタビューさせているか
 - [ ] Web と CLI を使い分ける場合、`$CLAUDE_CODE_REMOTE` 環境変数でフックを分岐しているか
 - [ ] Chrome 拡張機能でUI変更の自動検証を設定したか
+
+---
+
+## 新機能チェック（2026-06-29時点）
+
+### Artifacts（ベータ）
+- [ ] Team/Enterprise プランで Artifacts 機能が有効化されているか確認したか（2026-06-29+）
+- [ ] `/login` でAnthropicにサインインして Artifacts を有効にしているか（2026-06-29+）
+- [ ] PRレビュー・ダッシュボード・比較表などの視覚的出力に Artifacts を使っているか（2026-06-29+）
+- [ ] `Ctrl+]` で最新アーティファクトを再オープンできることを知っているか（2026-06-29+）
+- [ ] `CLAUDE_CODE_ARTIFACT_AUTO_OPEN=0` で自動ブラウザ起動を無効化しているか（CI/CDなど）（2026-06-29+）
+- [ ] Compliance API（`/v1/compliance/code/artifacts`）で組織のアーティファクトを管理しているか（2026-06-29+）
+- [ ] Artifactsのデザインシステム（カラー・フォント・スペーシング）をCLAUDE.mdに記述しているか（2026-06-29+）
+- [ ] ラスター画像の代わりにSVGを使ってArtifactsのトークンコストを削減しているか（2026-06-29+）
+
+### Code Intelligence（LSP Tool）
+- [ ] typed言語プロジェクト（TypeScript/Python等）にコードインテリジェンスプラグインをインストールしたか（2026-06-29+）
+- [ ] ファイル全体読み込みの代わりにLSPシンボルルックアップを使いコンテキスト削減しているか（2026-06-29+）
+- [ ] `/plugin` マーケットプレイスで自分の言語に対応するCode intelligenceプラグインを確認したか（2026-06-29+）
+
+### skillOverrides・コンテキストコスト管理
+- [ ] 頻繁に使わないスキルに `skillOverrides: { "skill-name": { "modelInvocable": false } }` を設定してコンテキスト節約しているか（2026-06-29+）
+- [ ] `disable-model-invocation: true` のスキルはコンテキストコストがゼロであることを理解しているか（2026-06-29+）
+- [ ] `/mcp` で各MCPサーバーのトークンコストを確認しているか（2026-06-29+）
+- [ ] 使わないMCPサーバーを切断してコンテキスト消費を削減しているか（2026-06-29+）
+
+### 並列化戦略の見直し
+- [ ] Subagents / Background agents（agent-view）/ Agent teams の3種の使い分けを理解しているか（2026-06-29+）
+- [ ] コンテキスト限界に達したらSubagents → Agent teams への移行を検討しているか（2026-06-29+）
+- [ ] Background agents（`/en/agent-view`）で独立した複数セッションを並列実行・監視しているか（2026-06-29+）
 
 ---
 
