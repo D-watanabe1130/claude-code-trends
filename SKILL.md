@@ -32,7 +32,7 @@ GitHubトレンドと公式ドキュメントの最新情報を取得し、設�
 - https://code.claude.com/docs/en/agent-sdk/subagents.md
 - https://code.claude.com/docs/en/agent-teams.md
 - https://code.claude.com/docs/en/agent-view.md
-- https://platform.claude.com/docs/en/managed-agents/overview
+- https://platform.claude.com/docs/en/managed-agents/overview.md
 
 Agent SDK 調査で特に抽出すべき概念:
 - オーケストレーター / ワーカーの役割分担原則
@@ -48,7 +48,7 @@ Managed Agents 調査で特に抽出すべき概念:
 
 **MCP 設計パターン（WebFetch）:**
 - https://code.claude.com/docs/en/mcp.md
-- https://modelcontextprotocol.io/introduction
+- https://modelcontextprotocol.io/docs/getting-started/intro.md
 - `gh api repos/modelcontextprotocol/servers/contents/README.md --jq '.content' | base64 -d | head -200`（公式 MCP サーバー一覧）
 
 MCP 設計で特に抽出すべき概念:
