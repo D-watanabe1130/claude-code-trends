@@ -2,6 +2,12 @@
 
 ---
 
+## 2026-07-06
+
+公式ドキュメント4種（best-practices/sub-agents/hooks/memory）を取得。外部GitHubソースはMCPスコープ制限により今週も取得不可。フックドキュメントからバージョン **v2.1.199+** を確認（前回はv2.1.176）。最大の新規判明事項は**フックイベント4件の新規確認**: `PostToolUseFailure`（ツール失敗後）・`Notification`（通知送信時、`permission_prompt`/`auth_success`等でマッチ）・`ConfigChange`（設定ファイル変更時）・`ElicitationResult`（MCP Elicitation 回答後）。また**マッチャー仕様の詳細が完全明文化**され、`SessionStart`はソース種別（startup/resume/clear/compact）でフィルタ可能、`SubagentStart`/`Stop`はエージェントタイプ名でマッチ、`StopFailure`はエラータイプ（rate_limit/overloaded/authentication_failed）でマッチ、`FileChanged`はリテラルファイル名でマッチすることが確認された。バージョン別新機能として v2.1.195+ でハイフン付きツール名完全一致・カンマ区切りマッチャーリスト対応、v2.1.196+ で `prompt_id` フィールド（OpenTelemetry連携）、v2.1.198+ でsymlink経由path-scoped rules対応、v2.1.199+ で `$CLAUDE_CODE_BRIDGE_SESSION_ID` が追加された。ベストプラクティス面では**逆境的レビューの過剰エンジニアリング警告**が公式追加（「ギャップを探せ」指示は常に何かを報告するため正確性・要件に関わるもののみ報告と明示すること）、ステータスライン・`@`ファイル参照・パイプ入力が公式推奨として明文化された。
+
+---
+
 ## 2026-06-29
 
 公式ドキュメント6種（best-practices/sub-agents/hooks/memory/features-overview/artifacts）を取得。外部GitHubソースはMCPスコープ制限により今週も取得不可。最大の新規判明事項は**Artifacts機能（ベータ）の公式ドキュメント確認**。Team/Enterpriseプランで、セッション出力をプライベートWebページとして`claude.ai`に公開・組織内共有できる機能で、`Ctrl+]`で再オープン、`CLAUDE_CODE_ARTIFACT_AUTO_OPEN=0`で自動起動を無効化、Compliance APIで組織管理が可能。また**Code intelligence（LSPツール）がExtensionの公式カテゴリに昇格**し、コードインテリジェンスプラグインによるシンボルナビゲーションがファイル全読み込みに代わるコンテキスト節約手段として公式推奨になった。features-overviewページが大幅更新され**機能ごとのコンテキストコスト表とロードタイミング図**が追加、また`skillOverrides`設定によりファイル編集不要でスキル可視性を上書き可能になったことが確認された。さらに**Subagents / Background agents（agent-view）/ Agent teams の3並列化オプション**が公式に明確区分された。ウェブ検索ではsafe mode・`/cd`コマンド・post-session hookが報告されているが公式ドキュメントでの詳細は来週確認予定。

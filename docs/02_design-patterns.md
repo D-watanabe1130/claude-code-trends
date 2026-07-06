@@ -1,6 +1,17 @@
 # Claude Code 設計パターン集
 
-最終更新: 2026-06-29
+最終更新: 2026-07-06
+
+## 直近の主要変更（2026-07-06）
+
+- **新規フックイベント4件確認**: `PostToolUseFailure`（ツール失敗後）/ `Notification`（通知送信時）/ `ConfigChange`（設定変更時）/ `ElicitationResult`（MCP Elicitation 回答後）
+- **マッチャー仕様完全明文化**: `SessionStart`=ソース種別 / `SubagentStart`/`Stop`=エージェントタイプ / `StopFailure`=エラータイプ / `FileChanged`=ファイル名でマッチ
+- **v2.1.195+**: ハイフン付きツール名完全一致・カンマ区切りマッチャーリスト対応
+- **v2.1.196+**: `prompt_id` フィールド追加（OpenTelemetry連携）
+- **v2.1.198+**: symlink経由でもpath-scoped rulesが正しくマッチ
+- **v2.1.199+**: `$CLAUDE_CODE_BRIDGE_SESSION_ID` 環境変数（Remote Control相関）
+- **逆境的レビュー警告**: 「ギャップを探せ」指示は常に過剰報告→「正確性・要件のみ報告」と明示すること（公式追加）
+- **`shell` パラメータ**: command フックでシェルを明示指定可能に
 
 ## 直近の主要変更（2026-06-29）
 
@@ -385,6 +396,140 @@ MCP サーバーのツールをフックから直接呼び出す。外部サー�
 
 `retry-check.sh` が `{retry: true}` を返すと操作をリトライ。
 
+### PostToolUseFailure（ツール失敗後の処理）（2026-07-06確認）
+
+ツールの実行が失敗した後に発火。失敗監視・アラート・リトライ判断に活用：
+
+```json
+{
+  "hooks": {
+    "PostToolUseFailure": [
+      {
+        "matcher": "Bash",
+        "hooks": [{ "type": "command", "command": "notify-failure.sh" }]
+      }
+    ]
+  }
+}
+```
+
+### Notification（通知イベント処理）（2026-07-06確認）
+
+Claude Code が通知を送信するタイミングで発火。`matcher` で通知タイプをフィルタ：
+
+```json
+{
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "permission_prompt",
+        "hooks": [{ "type": "command", "command": "log-permission.sh" }]
+      }
+    ]
+  }
+}
+```
+
+マッチ可能な通知タイプ例: `permission_prompt`, `auth_success`
+
+### ConfigChange（設定ファイル変更時）（2026-07-06確認）
+
+Claude Code の設定ファイルが変更された際に発火。設定変更後の処理（スキル再ロード等）に：
+
+```json
+{
+  "hooks": {
+    "ConfigChange": [
+      {
+        "hooks": [{ "type": "command", "command": "on-config-change.sh" }]
+      }
+    ]
+  }
+}
+```
+
+### ElicitationResult（MCP Elicitation 回答後）（2026-07-06確認）
+
+`Elicitation`（MCPサーバーがユーザー入力を要求）に対してユーザーが回答した後に発火：
+
+```json
+{
+  "hooks": {
+    "ElicitationResult": [
+      {
+        "hooks": [{ "type": "command", "command": "log-elicitation-result.sh" }]
+      }
+    ]
+  }
+}
+```
+
+### SessionStart のソース別マッチ（2026-07-06確認）
+
+`SessionStart` マッチャーでセッション開始ソースを絞り込み可能：
+
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "resume",
+        "hooks": [{ "type": "command", "command": "restore-context.sh" }]
+      },
+      {
+        "matcher": "compact",
+        "hooks": [{ "type": "command", "command": "reload-critical-context.sh" }]
+      }
+    ]
+  }
+}
+```
+
+| ソース値 | 意味 |
+|---------|------|
+| `startup` | 新規セッション開始 |
+| `resume` | セッション再開 |
+| `clear` | `/clear` によるリセット後 |
+| `compact` | `/compact` 後の再開 |
+
+### SubagentStart/Stop のエージェントタイプマッチ（2026-07-06確認）
+
+```json
+{
+  "hooks": {
+    "SubagentStart": [
+      {
+        "matcher": "Explore",
+        "hooks": [{ "type": "command", "command": "track-explore-agent.sh" }]
+      }
+    ]
+  }
+}
+```
+
+サブエージェントタイプ（`general-purpose`, `Explore`, カスタム名）でフィルタリング可能。
+
+### StopFailure のエラータイプマッチ（2026-07-06確認）
+
+```json
+{
+  "hooks": {
+    "StopFailure": [
+      {
+        "matcher": "rate_limit",
+        "hooks": [{ "type": "command", "command": "handle-rate-limit.sh" }]
+      }
+    ]
+  }
+}
+```
+
+| エラータイプ | 意味 |
+|------------|------|
+| `rate_limit` | レートリミット到達 |
+| `overloaded` | APIサーバー過負荷 |
+| `authentication_failed` | 認証失敗 |
+
 ### PostToolBatch（並列ツール呼び出し後の検証）
 
 複数ツールが並列実行された後、次のモデル呼び出し前にブロックできる。
@@ -399,6 +544,33 @@ MCP サーバーのツールをフックから直接呼び出す。外部サー�
     ]
   }
 }
+```
+
+### prompt_id によるOpenTelemetry連携（v2.1.196+）（2026-07-06確認）
+
+フック入力の共通フィールドに `prompt_id` が追加。分散トレーシングシステムと相関させることが可能：
+
+```bash
+#!/bin/bash
+INPUT=$(cat)
+PROMPT_ID=$(echo "$INPUT" | jq -r '.prompt_id')
+SESSION_ID=$(echo "$INPUT" | jq -r '.session_id')
+
+# OpenTelemetryやログシステムにprompt_idを渡す
+curl -s "$OTEL_ENDPOINT/traces" \
+  -d "{\"prompt_id\": \"$PROMPT_ID\", \"session_id\": \"$SESSION_ID\"}"
+```
+
+### $CLAUDE_CODE_BRIDGE_SESSION_ID（v2.1.199+）（2026-07-06確認）
+
+Remote Control セッションとの相関追跡用の環境変数。Webダッシュボードやリモートコントロール統合で活用：
+
+```bash
+#!/bin/bash
+if [ -n "$CLAUDE_CODE_BRIDGE_SESSION_ID" ]; then
+  # Remote Control セッションと相関したログを出力
+  echo "Bridge session: $CLAUDE_CODE_BRIDGE_SESSION_ID" >> /tmp/session-log.txt
+fi
 ```
 
 ### HTTPフック with allowedEnvVars（認証付き外部エンドポイント）
@@ -1003,11 +1175,12 @@ v2.1.161 から `/fork` コマンドがデフォルト有効。フォーク観�
 Use a subagent to review the rate limiter diff against PLAN.md.
 Check that every requirement is implemented, the listed edge cases have tests,
 and nothing outside the task's scope changed.
-Report gaps, not style preferences.
+Report only gaps that affect correctness or the stated requirements.
+Style preferences are optional.
 ```
 
 - ビルトインの `/code-review` スキルが同様の機能を提供
-- **注意**: 「ギャップを探す」指示は過剰エンジニアリングを招くため、「正確性・要件に関わるもののみ報告」と明示すること
+- **重要（2026-07-06 公式追加）**: 「ギャップを探す」よう指示されたレビュアーは実装が正しくても何かを報告する傾向がある。これは「余分な抽象化・防衛的コード・実際には起きないケースのテスト」という過剰エンジニアリングを招く。**「正確性と要件に関わるもののみ」と明示**することが必須。
 - レビュアーが結果を受け取り、修正して再レビューする内部ループを形成できる
 
 ---
