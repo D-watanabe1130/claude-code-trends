@@ -2,6 +2,12 @@
 
 ---
 
+## 2026-07-13
+
+公式ドキュメント4種（best-practices/sub-agents/hooks/memory）を取得。外部GitHubソースはMCPスコープ制限により今週も取得不可。バージョンが **v2.1.205+** まで進んでいることを確認（前回: v2.1.199+）。最大の新規判明事項は **`/doctor` コマンド（v2.1.205+）** の追加で、同一 `.claude/agents/` ディレクトリ内で同じ `name` を持つファイルを自動検出してリネーム・削除を提案する。また **`--append-subagent-system-prompt` フラグ（v2.1.205+）** が追加され、非インタラクティブモードで全サブエージェント（ネストを含む）のシステムプロンプト末尾に一括追記できるようになった。サブエージェント関連では **v2.1.198+ から Explore サブエージェントのモデルが Haiku 固定からメイン会話のモデルの継承に変更**（Claude API 上限は Opus）、**`background` フィールドが追加**されてデフォルト動作もバックグラウンド実行に変更、**`/agents` コマンドの対話型ウィザードが廃止**されファイル直接編集方式に移行した。さらに **v2.1.200+** で `permissionMode: "manual"` エイリアス（`"default"` と同義）、**v2.1.203+** で `isolation: worktree` の Bash コマンドがワークツリー削除後にメインチェックアウトへサイレント fallback するバグを修正、**v2.1.178+** でネスト `.claude/agents/` ディレクトリで同名エージェントが重複する場合は CWD に最近傍の定義が優先されるルールが明文化。フック分野では `PermissionDenied` フックの `retry: true` パターンとフック出力の 10,000 文字上限が明文化された。
+
+---
+
 ## 2026-07-06
 
 公式ドキュメント4種（best-practices/sub-agents/hooks/memory）を取得。外部GitHubソースはMCPスコープ制限により今週も取得不可。フックドキュメントからバージョン **v2.1.199+** を確認（前回はv2.1.176）。最大の新規判明事項は**フックイベント4件の新規確認**: `PostToolUseFailure`（ツール失敗後）・`Notification`（通知送信時、`permission_prompt`/`auth_success`等でマッチ）・`ConfigChange`（設定ファイル変更時）・`ElicitationResult`（MCP Elicitation 回答後）。また**マッチャー仕様の詳細が完全明文化**され、`SessionStart`はソース種別（startup/resume/clear/compact）でフィルタ可能、`SubagentStart`/`Stop`はエージェントタイプ名でマッチ、`StopFailure`はエラータイプ（rate_limit/overloaded/authentication_failed）でマッチ、`FileChanged`はリテラルファイル名でマッチすることが確認された。バージョン別新機能として v2.1.195+ でハイフン付きツール名完全一致・カンマ区切りマッチャーリスト対応、v2.1.196+ で `prompt_id` フィールド（OpenTelemetry連携）、v2.1.198+ でsymlink経由path-scoped rules対応、v2.1.199+ で `$CLAUDE_CODE_BRIDGE_SESSION_ID` が追加された。ベストプラクティス面では**逆境的レビューの過剰エンジニアリング警告**が公式追加（「ギャップを探せ」指示は常に何かを報告するため正確性・要件に関わるもののみ報告と明示すること）、ステータスライン・`@`ファイル参照・パイプ入力が公式推奨として明文化された。

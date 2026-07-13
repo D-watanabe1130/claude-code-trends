@@ -1,47 +1,60 @@
 # 最新トレンドサマリー
 
-最終更新: 2026-07-06
+最終更新: 2026-07-13
 
 ---
 
 ## 最新バージョン
 
-**v2.1.199+**（フックドキュメントより確認）
+**v2.1.205+**（サブエージェントドキュメントより確認）
 
 主要マイルストーン:
+- v2.1.178+: ネストディレクトリで同名エージェントはCWD最近傍が優先
 - v2.1.195+: マッチャーhyphen対応・カンマ区切りリスト
 - v2.1.196+: `prompt_id` フィールド（OpenTelemetry連携）
-- v2.1.198+: symlink経由path-scoped rules対応
+- v2.1.198+: symlink経由path-scoped rules対応 / Explore モデル継承変更 / `/agents` ウィザード廃止 / `background` フィールド追加・デフォルトでバックグラウンド化
 - v2.1.199+: `$CLAUDE_CODE_BRIDGE_SESSION_ID`（Remote Control相関）
+- v2.1.200+: `permissionMode: "manual"` エイリアス追加
+- v2.1.203+: `isolation: worktree` Bash バグ修正
+- v2.1.205+: `/doctor` コマンド・`--append-subagent-system-prompt` フラグ
 
 ---
 
-## 今週のホットトピック（2026-07-06）
+## 今週のホットトピック（2026-07-13）
 
-1. **新規フックイベント4件確認**: `PostToolUseFailure` / `Notification` / `ConfigChange` / `ElicitationResult`
-2. **マッチャー仕様の完全明文化**: `SessionStart`（ソース種別）/ `SubagentStart`/`Stop`（エージェントタイプ）/ `StopFailure`（エラータイプ）/ `FileChanged`（ファイル名）
-3. **逆境的レビューの過剰エンジニアリング警告**: 公式ドキュメントに注意事項追加
-4. **`shell`パラメータ**: command フックに追加
-5. **v2.1.196+ `prompt_id`**: フック入力にOpenTelemetry相関ID追加
-6. **v2.1.199+ `$CLAUDE_CODE_BRIDGE_SESSION_ID`**: Remote Control セッション追跡
+1. **`/doctor` コマンド（v2.1.205+）**: 重複サブエージェントファイルを自動検出・解決提案
+2. **`--append-subagent-system-prompt` フラグ（v2.1.205+）**: 全サブエージェント（ネスト含む）のシステムプロンプト末尾に一括追記
+3. **Explore モデル継承変更（v2.1.198+）**: Haiku 固定 → メイン会話のモデルを継承（API上限Opus）
+4. **`background` フィールド追加・デフォルト変更（v2.1.198+）**: サブエージェントがデフォルトでバックグラウンド実行に
+5. **`permissionMode: "manual"` エイリアス（v2.1.200+）**: `"default"` の人間可読エイリアス
+6. **`/agents` ウィザード廃止（v2.1.198+）**: CLIウィザード廃止、ファイル直接編集に移行
+7. **`PermissionDenied` フックの `retry: true` パターン**: Auto Mode 拒否後のリトライ制御
 
 ---
 
-## 前週（2026-06-29）との主要差分
+## 前週（2026-07-06）との主要差分
 
 | カテゴリ | 変更内容 |
 |---------|---------|
-| フックイベント | `PostToolUseFailure`, `Notification`, `ConfigChange`, `ElicitationResult` が新規確認 |
-| マッチャー | SessionStart source / SubagentStart agent type / StopFailure error type マッチが明文化 |
-| バージョン | v2.1.176 → v2.1.199+ へ更新 |
-| ベストプラクティス | 逆境的レビューの過剰エンジニアリング注意が公式追加 |
-| 公式推奨 | ステータスライン・`@`ファイル参照・パイプ入力が明文化 |
-| CLAUDE.md | `.claude/CLAUDE.md` が公式配置場所として明記 |
+| バージョン | v2.1.199+ → v2.1.205+ |
+| サブエージェント | `/doctor` コマンド追加（重複エージェントファイル診断） |
+| サブエージェント | `--append-subagent-system-prompt` フラグ追加 |
+| サブエージェント | Explore のモデル継承変更（Haiku固定 → 親会話のモデル、API上限Opus） |
+| サブエージェント | `background` フィールド追加、v2.1.198+でデフォルトがバックグラウンドに |
+| サブエージェント | `permissionMode: "manual"` エイリアス追加（v2.1.200+） |
+| サブエージェント | `isolation: worktree` バグ修正（v2.1.203+） |
+| サブエージェント | `/agents` ウィザード廃止（v2.1.198+） |
+| フック | `PermissionDenied` フックの `retry: true` パターン明文化 |
+| フック | 出力文字数上限 10,000 文字が明文化 |
 
 ---
 
-## 前々週（2026-06-22）以前からの既知事項（変更なし）
+## 前々週（2026-07-06）以前からの既知事項（変更なし）
 
+- 新規フックイベント4件: `PostToolUseFailure` / `Notification` / `ConfigChange` / `ElicitationResult`
+- マッチャー仕様: SessionStart（ソース）/ SubagentStart/Stop（エージェントタイプ）/ StopFailure（エラータイプ）
+- v2.1.196+ `prompt_id` フィールド（OpenTelemetry連携）
+- v2.1.199+ `$CLAUDE_CODE_BRIDGE_SESSION_ID`（Remote Control相関）
 - Artifacts機能（ベータ）: Team/Enterprise, `Ctrl+]`, 16MiB制限
 - Code intelligence（LSP Tool）: Extension公式カテゴリ
 - `skillOverrides`: `modelInvocable` フィールドでスキル可視性制御

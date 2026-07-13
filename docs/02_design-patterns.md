@@ -1,6 +1,19 @@
 # Claude Code 設計パターン集
 
-最終更新: 2026-07-06
+最終更新: 2026-07-13
+
+## 直近の主要変更（2026-07-13）
+
+- **`/doctor` コマンド（v2.1.205+）**: 重複サブエージェントファイルを自動検出・解決提案
+- **`--append-subagent-system-prompt` フラグ（v2.1.205+）**: 全サブエージェント（ネスト含む）のシステムプロンプト末尾に一括追記
+- **Explore モデル継承変更（v2.1.198+）**: Haiku 固定 → メイン会話のモデルを継承（API上限Opus）
+- **`background` フィールド追加（v2.1.198+）**: サブエージェントのデフォルト実行がバックグラウンドに変更
+- **`permissionMode: "manual"` エイリアス（v2.1.200+）**: `"default"` の人間可読エイリアス
+- **`isolation: worktree` バグ修正（v2.1.203+）**: ワークツリー削除後のサイレント fallback を防止
+- **`/agents` ウィザード廃止（v2.1.198+）**: インタラクティブウィザード廃止、ファイル直接編集方式に
+- **ネスト同名エージェント優先ルール（v2.1.178+）**: CWD最近傍の定義が優先
+- **`PermissionDenied` フックの `retry: true`**: Auto Mode 拒否後のリトライ制御パターン明文化
+- **フック出力 10,000 文字上限**: 超過時はファイルにフォールバックが明文化
 
 ## 直近の主要変更（2026-07-06）
 
@@ -117,6 +130,9 @@ memory: project          # 永続メモリ（project/user/local）
 isolation: worktree      # 独立gitワークツリーで実行
 effort: high             # 努力レベルのオーバーライド
 color: red               # UIでの表示色
+background: true         # 常にバックグラウンド実行（v2.1.198+: 未設定時もデフォルトでバックグラウンド）
+permissionMode: manual   # "default" と同義のエイリアス（v2.1.200+）
+initialPrompt: "前回の続きから開始します。"  # 初回ユーザーターンに自動送信
 ---
 ```
 
@@ -124,6 +140,9 @@ color: red               # UIでの表示色
 - `tools` で権限を最小化（`disallowedTools` でdenylistも指定可）
 - `model` で用途別コスト最適化（調査 → haiku、品質レビュー → opus）
 - `memory: project` でセッションをまたいだ知識蓄積が可能
+- **v2.1.198+**: `background` 未設定でもデフォルトでバックグラウンド実行になった
+- **v2.1.200+**: `permissionMode: "manual"` は `"default"` の人間可読エイリアス
+- **`/doctor` コマンド（v2.1.205+）**: 同名エージェントファイルの重複を自動検出・解決提案
 
 ### サブエージェント永続メモリパターン（2026-05-25+）
 
@@ -141,6 +160,53 @@ memory: project
 ---
 Update your agent memory as you discover patterns, conventions, and recurring issues.
 ```
+
+### Explore モデル上書きパターン（v2.1.198+）
+
+Explore のデフォルトモデルが Haiku 固定からメイン会話継承に変更された。コスト管理のため Haiku に戻す場合は組み込みを上書き:
+
+```markdown
+# ~/.claude/agents/Explore.md
+---
+name: Explore
+description: Fast read-only search agent
+model: haiku
+---
+```
+
+プロバイダー別の動作:
+- **Claude API**: 継承モデルを Opus 上限でキャップ（Sonnet 以下はそのまま）
+- **Bedrock/Vertex/Foundry**: 上限なしで継承
+
+### `--append-subagent-system-prompt` パターン（v2.1.205+）
+
+非インタラクティブモードで全サブエージェント（ネスト含む）のシステムプロンプト末尾に追記:
+
+```bash
+# 全サブエージェントに共通の制約を一括適用
+claude --append-subagent-system-prompt \
+  "Always respond in Japanese. Never modify files outside /src." \
+  -p "investigate and fix the auth bug"
+```
+
+CI/CD でのユースケース:
+- 組織セキュリティポリシーの一括適用
+- 言語・応答形式の統一強制
+- デバッグ情報追加（ロギング指示の一括注入）
+
+### /doctor による設定ヘルスチェック（v2.1.205+）
+
+重複エージェントファイルを自動検出:
+
+```bash
+/doctor  # セッション内で実行
+```
+
+以下を検出・報告する:
+- 同一 `.claude/agents/` ディレクトリ内で `name` フロントマターが重複するファイル
+- リネームまたは削除の提案を提示
+
+**予防策**: エージェントファイル名を `name` フロントマターと一致させる（ファイル名は識別に使わないが混乱防止）。
 
 ### フォークパターン（2026-05-25+）
 
@@ -395,6 +461,27 @@ MCP サーバーのツールをフックから直接呼び出す。外部サー�
 ```
 
 `retry-check.sh` が `{retry: true}` を返すと操作をリトライ。
+
+Auto Mode 分類モデルが拒否した操作を条件付きで再試行させるパターン（2026-07-13 明文化）:
+
+```bash
+#!/bin/bash
+# retry-check.sh: 特定条件を満たす場合のみリトライを許可
+INPUT=$(cat)
+TOOL=$(echo "$INPUT" | jq -r '.tool_name')
+
+# git 操作は再試行を許可
+if echo "$TOOL" | grep -q "^Bash$"; then
+  CMD=$(echo "$INPUT" | jq -r '.tool_input.command')
+  if echo "$CMD" | grep -qE "^git (status|log|diff|show)"; then
+    echo '{"hookSpecificOutput": {"hookEventName": "PermissionDenied", "retry": true}}'
+    exit 0
+  fi
+fi
+exit 0  # リトライなし（デフォルト）
+```
+
+**注意**: フック出力文字列は 10,000 文字が上限。超過すると自動でファイルに保存され、プレビュー＋パスが表示される（2026-07-13 明文化）。
 
 ### PostToolUseFailure（ツール失敗後の処理）（2026-07-06確認）
 
