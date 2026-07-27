@@ -1,6 +1,15 @@
 # Claude Code 設計パターン集
 
-最終更新: 2026-07-20
+最終更新: 2026-07-27
+
+## 直近の主要変更（2026-07-27）
+
+- **Auto Memory `modified` タイムスタンプ（v2.1.214+）**: memory ファイルへの書き込み時に ISO 8601 形式の `modified` フィールドが自動記録される
+- **フック exit 2 の JSON 検証失敗時でも確実ブロック（v2.1.214+）**: JSON エラーが優先されていた旧挙動を修正
+- **`/memory` のノンブロッキング化（v2.1.216+）**: GUI エディタで開いてもセッション継続（ターミナルエディタは従来通り）
+- **`isolation: worktree` の Bash コマンド内容チェック（v2.1.216+）**: `git -C` / `--git-dir` / `GIT_DIR` / `GIT_WORK_TREE` / `cd` チェーンでメインチェックアウトにアクセスするコマンドをエラーに
+- **パス限定ルールのブレース展開予算制限（v2.1.217+）**: 1,000 パターン / 4 MiB 超過分はリテラル扱い（CLI クラッシュを防止）
+- **サブエージェントフロントマターフックのワークスペーストラスト（v2.1.218+）**: フロントマター定義フックにもワークスペーストラスト承認が必要に
 
 ## 直近の主要変更（2026-07-20）
 
@@ -812,6 +821,67 @@ paths:
 - 古くなったエントリは積極的に削除またはマージ
 - YAML frontmatter はサイズ測定から除外される（v2.1.211+）
 ```
+
+### Auto Memory `modified` フィールドによる鮮度管理（v2.1.214+）
+
+Claude が YAML フロントマターを含む memory ファイルを書き込むと、Claude Code が `modified` フィールドに ISO 8601 タイムスタンプを自動記録する。
+
+```yaml
+---
+modified: 2026-07-27T09:15:00Z
+---
+## ビルドコマンド
+npm run build
+```
+
+- 既存フロントマターがあれば次回書き込み時に自動付与（なければ追加されない）
+- v2.1.214 以降が必要
+- 人間・Claude どちらも「この情報はいつ記録したか」をファイルを開かずに判断できる
+
+**活用パターン**: 定期タスク（週次 trendupdate 等）で古い memory エントリを整理する際の判断基準として使う。
+
+```bash
+# MEMORY.md の中で modified が古いエントリを探す
+grep -A1 "modified:" ~/.claude/projects/*/memory/MEMORY.md
+```
+
+### `isolation: worktree` の Bash コマンドチェックパターン（v2.1.216+）
+
+`isolation: worktree` を使うサブエージェントでは、ワーキングディレクトリに加えて Bash コマンドの内容自体もチェックされる。
+
+**ブロックされるコマンドパターン:**
+
+```bash
+# NG: git -C でメインチェックアウトを指定
+git -C /path/to/main-checkout status
+
+# NG: --git-dir でリダイレクト
+git --git-dir=/path/to/.git log
+
+# NG: 環境変数でリダイレクト
+GIT_DIR=/path/to/.git git status
+
+# NG: cd チェーンでメインチェックアウトに移動
+cd /path/to/main-checkout && git push
+
+# NG: 複雑すぎて解析不能（単純なコマンドに分割するよう求めるエラー）
+cd /worktree && eval "$(cat complex_script.sh)"
+```
+
+**安全なパターン:**
+
+```bash
+# OK: ワークツリー内でそのまま git 操作（CWD がワークツリー内）
+git add -A && git commit -m "changes"
+
+# OK: 相対パスの使用
+cp src/file.ts ./dst/
+
+# OK: PowerShell（コマンド内容チェック対象外、WD チェックのみ）
+Move-Item source.txt destination.txt
+```
+
+**設計指針**: `isolation: worktree` サブエージェントでは git 操作をシンプルな単一コマンドにとどめる。複数コマンドをチェーンする場合はシェルスクリプトに切り出し、そのスクリプト内で完結させる（スクリプト自体はワークツリー内の WD で実行されるため OK）。
 
 ### claudeMdExcludes（モノレポ向け）（2026-05-25+）
 
