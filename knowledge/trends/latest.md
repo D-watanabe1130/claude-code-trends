@@ -1,12 +1,12 @@
 # 最新トレンドサマリー
 
-最終更新: 2026-07-27
+最終更新: 2026-08-03
 
 ---
 
 ## 最新バージョン
 
-**v2.1.218+**（前回: v2.1.211+）
+**v2.1.218+**（前回から変化なし確認済み）
 
 主要マイルストーン:
 - v2.1.178+: ネストディレクトリで同名エージェントはCWD最近傍が優先
@@ -28,39 +28,38 @@
 
 ---
 
-## 今週のホットトピック（2026-07-27）
+## 今週のホットトピック（2026-08-03）
 
-1. **Auto Memory に `modified` タイムスタンプ（v2.1.214+）**: Claude が memory ファイルを書き込む際、ISO 8601 形式の `modified` フロントマターフィールドが自動記録される。ファイルの鮮度が人間にも Claude にも可視化される。
-2. **`isolation: worktree` の Bash コマンド内容チェック（v2.1.216+）**: WD チェックに加え、Bash コマンド自体が git リダイレクト（`git -C` / `--git-dir` / `GIT_DIR` / `GIT_WORK_TREE` / メインチェックアウトへの `cd`）でメインチェックアウトにアクセスするパターンを検出してエラーにする
-3. **`/memory` コマンドのノンブロッキング化（v2.1.216+）**: GUI エディタ（VS Code 等）でメモリファイルを開いてもセッションが停止しなくなった
-4. **`CLAUDE_CODE_NEW_INIT=1` の文書化**: `/init` のインタラクティブ多段階フロー（AGENTS.md / Devin / Windsurf / Clinerules 読み込み）が公式ドキュメントに記載
-5. **`claudeMdExcludes` 設定の文書化**: モノレポで他チームの CLAUDE.md をスキップする glob パターン設定が公式化
-6. **`disable-model-invocation: true` スキルフィールドの文書化**: 副作用スキルをモデル自動呼び出しから保護する仕組みが公式記載
+1. **Claude 5 モデルファミリーがサブエージェントドキュメントに公式例示**: `model` フィールドのフルIDとして `claude-opus-5` / `claude-sonnet-5` が公式ドキュメントに登場。Claude 5 世代（Opus 5, Sonnet 5, Fable 5）がサブエージェントで利用可能。
+2. **`Ctrl+G` でプランをエディタ直接編集（公式ベストプラクティスに明記）**: プランモードの Plan ステップで `Ctrl+G` を押すと Claude の計画をテキストエディタで編集してから実装に渡せる。
+3. **`--no-session-persistence` フラグが公式明記**: `-p` フラグでの非インタラクティブ実行はデフォルトでセッション保存される。使い捨て実行は `--no-session-persistence` で抑制。
+4. **フック入力 `effort` フィールドがオブジェクト型として明文化**: `{ level: "high" }` 形式のオブジェクトとして受け取ることが公式文書化。
+5. **`/context` コマンドの役割が公式明確化**: CLAUDE.md の読み込み確認には `/context`、ファイル編集には `/memory` と役割が整理。
 
 ---
 
-## 前週（2026-07-20）との主要差分
+## 前週（2026-07-27）との主要差分
 
 | カテゴリ | 変更内容 |
 |---------|---------|
-| バージョン | v2.1.211+ → v2.1.218+ |
-| Auto Memory | `modified` フロントマターフィールド追加（ISO 8601）（v2.1.214+） |
-| フック | exit 2 が JSON 検証失敗でも確実ブロック（v2.1.214+） |
-| `/memory` | GUIエディタ開放中もセッション継続（v2.1.216+） |
-| サブエージェント | `isolation: worktree` の Bash コマンド自体の git リダイレクト検出（v2.1.216+） |
-| ルール | ブレース展開予算制限（1,000パターン / 4 MiB）でCLIクラッシュを防止（v2.1.217+） |
-| サブエージェント | フロントマターフック定義にワークスペーストラスト適用（v2.1.218+） |
-| `/init` | `CLAUDE_CODE_NEW_INIT=1` で多段階インタラクティブフロー（新規文書化） |
-| 設定 | `claudeMd` キーで managed-settings.json にCLAUDE.mdを直接埋め込み（新規文書化） |
-| 設定 | `claudeMdExcludes` でモノレポ CLAUDE.md を選択的除外（新規文書化） |
-| Auto Memory | `autoMemoryDirectory` で保存場所カスタマイズ可能（新規文書化） |
-| 環境変数 | `CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD`（新規文書化） |
-| スキル | `disable-model-invocation: true` フィールド（新規文書化） |
+| バージョン | 変化なし（v2.1.218+） |
+| モデル | Claude 5（`claude-opus-5` / `claude-sonnet-5` / `claude-fable-5`）がサブエージェントドキュメントに公式例示 |
+| UX | `Ctrl+G` でプランをエディタ編集する手順が公式ベストプラクティスに明記 |
+| CLI | `--no-session-persistence` フラグの存在・用途が公式明記 |
+| フック | `effort` 入力フィールドがオブジェクト型 `{ level: string }` として明文化 |
+| デバッグ | `/context` vs `/memory` の役割分担が公式で明確化 |
+| 出力形式 | `--output-format json` は `result` フィールドを含む単一JSON、`stream-json` は init イベントから始まる複数行JSON |
 
 ---
 
 ## 前々週以前からの既知事項（変更なし）
 
+- Auto Memory に `modified` タイムスタンプ（ISO 8601）（v2.1.214+）
+- フック exit 2 が JSON 検証失敗でも確実ブロック（v2.1.214+）
+- `/memory` がGUIエディタ開放中もセッション継続（v2.1.216+）
+- `isolation: worktree` の Bash コマンド git リダイレクト検出（v2.1.216+）
+- パス限定ルールのブレース展開予算制限（v2.1.217+）
+- サブエージェントフロントマターフックのワークスペーストラスト（v2.1.218+）
 - `/doctor` コマンド（重複エージェントファイル診断 + CLAUDE.md トリム提案）: v2.1.205〜206+
 - `--append-subagent-system-prompt` フラグ: v2.1.205+
 - Explore モデル継承変更（Haiku固定 → 親会話モデル、API上限Opus）: v2.1.198+
@@ -84,6 +83,11 @@
 - `SessionEnd` フックイベント（clear/resume/logout/prompt_input_exit/bypass_permissions_disabled/other でマッチ）
 - `CwdChanged` フックイベント
 - `InstructionsLoaded` フックイベント（session_start/nested_traversal/path_glob_match/include/compact でマッチ）
+- `autoMemoryDirectory` でAuto Memory 保存場所カスタマイズ
+- `CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD` 環境変数
+- スキル `disable-model-invocation: true` フィールド
+- `AGENTS.md` 互換パターン（`@AGENTS.md` インポートまたは symlink）
+- `claudeMdExcludes` でモノレポ CLAUDE.md を選択的除外
 
 ---
 

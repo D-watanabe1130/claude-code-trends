@@ -1,6 +1,14 @@
 # Claude Code 設計パターン集
 
-最終更新: 2026-07-27
+最終更新: 2026-08-03
+
+## 直近の主要変更（2026-08-03）
+
+- **Claude 5 ファミリーがサブエージェントドキュメントに公式例示**: `model` フィールドで `claude-opus-5` / `claude-sonnet-5` / `claude-fable-5` をフルIDとして指定可能
+- **`Ctrl+G` でプランをエディタ直接編集（公式明記）**: プランモードの Plan ステップで `Ctrl+G` を押すとエディタが開き計画を編集できる
+- **`--no-session-persistence` フラグが公式明記**: `-p` 非インタラクティブ実行はデフォルトでセッション保存。CI/CDの使い捨て実行では明示的に追加が必要
+- **フック入力 `effort` フィールドがオブジェクト型として明文化**: `{ level: "low"|"medium"|"high"|"xhigh"|"max" }` 形式
+- **`/context` vs `/memory` の役割整理**: 読み込み確認→`/context`、ファイル編集→`/memory`
 
 ## 直近の主要変更（2026-07-27）
 
@@ -127,12 +135,17 @@ done
 - タスク間は `/clear` でリセット
 - 調査・探索にはサブエージェントを使用
 
-### 推奨ワークフロー
+### 推奨ワークフロー（2026-08-03 公式確認）
 
 1. **Explore**（Plan Mode）: ファイル読み込みのみ、変更なし
-2. **Plan**: 詳細な実装計画作成（`Ctrl+G` でエディタ編集）
-3. **Implement**: コーディング＋テスト検証
+2. **Plan**（Plan Mode）: 詳細な実装計画作成 → **`Ctrl+G` でエディタを開いて計画を直接編集**可能
+3. **Implement**（Default Mode）: コーディング＋テスト検証
 4. **Commit**: コミット＆PR作成
+
+**`Ctrl+G` の活用場面:**
+- Claude の計画を受け入れる前にスコープを絞りたい
+- 計画の一部を差し替えてから実装させたい
+- チームレビュー用に計画書を整形したい
 
 ---
 
@@ -179,6 +192,32 @@ memory: project
 ---
 Update your agent memory as you discover patterns, conventions, and recurring issues.
 ```
+
+### Claude 5 モデルID の直接指定パターン（2026-08-03 公式確認）
+
+サブエージェントの `model` フィールドでフルモデル ID を使い最新世代を明示指定できる:
+
+```yaml
+---
+name: premium-reviewer
+description: 高品質コードレビュー（Opus 5 使用）
+model: claude-opus-5    # Claude 5 世代を直接指定
+tools: Read, Grep, Glob
+---
+```
+
+利用可能なエイリアスとフルID:
+
+| エイリアス | フルID例 |
+|-----------|---------|
+| `opus` | `claude-opus-5` |
+| `sonnet` | `claude-sonnet-5` |
+| `haiku` | `claude-haiku-4-5-20251001` |
+| `fable` | `claude-fable-5` |
+
+- エイリアスは Anthropic が最新世代に自動マッピング（ベストプラクティス）
+- フルIDは特定バージョンに固定したい場合（再現性重視）
+- `--model` CLIフラグと同じ形式を受け付ける
 
 ### Explore モデル上書きパターン（v2.1.198+）
 
@@ -744,6 +783,33 @@ ln -s AGENTS.md CLAUDE.md
 ```
 
 仕様完成後は**新しいセッション**で実装開始（クリーンなコンテキスト）。
+
+---
+
+## 非インタラクティブ実行パターン（2026-08-03 公式詳細明記）
+
+```bash
+# デフォルト: セッションが保存され、後で --resume で再開できる
+claude -p "analyze this code"
+
+# CI/CD の使い捨て実行: セッションを保存しない
+claude -p "analyze this code" --no-session-persistence
+
+# 出力フォーマット
+# json: result フィールドを含む単一JSONオブジェクト（スクリプト解析向け）
+claude -p "list API endpoints" --output-format json
+# stream-json: 1行1JSON・init イベントから開始（リアルタイム処理向け）
+claude -p "analyze logs" --output-format stream-json --verbose
+```
+
+**`/context` vs `/memory` の使い分け（2026-08-03 公式整理）:**
+
+| コマンド | 用途 |
+|---------|------|
+| `/context` | ロード済みのメモリファイル一覧とその内容を確認（デバッグ用） |
+| `/memory` | メモリファイルを開いて編集・Auto Memory のトグル（編集用） |
+
+CLAUDE.md が正しくロードされているか確認するには `/context` を実行してメモリファイルリストをチェックする。
 
 ---
 
