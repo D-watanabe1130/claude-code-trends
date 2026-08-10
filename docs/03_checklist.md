@@ -1,13 +1,15 @@
 # Claude Code 設計チェックリスト
 
-最終更新: 2026-08-03
+最終更新: 2026-08-10
 
 ---
 
 ## プロジェクト初期設定
 
-- [ ] `/init` で CLAUDE.md を自動生成（`CLAUDE_CODE_NEW_INIT=1` でインタラクティブ版）
+- [ ] `/init` で CLAUDE.md を自動生成（`CLAUDE_CODE_NEW_INIT=1` でインタラクティブ版・他エージェントルール読み込み対応）
+- [ ] 他のコーディングエージェント（Cursor/Copilot/AGENTS.md等）を使っている場合は `/import` で設定を一括移行（v2.1.213+）
 - [ ] CLAUDE.md を 200行以内に保つ（超えると指示が無視されやすくなる）
+- [ ] CLAUDE.md に保守者向けメモを記録する場合は `<!-- ... -->` HTML コメントを使う（コンテキストに入らない）
 - [ ] `.claude/rules/` でパススコープルールを整理（コンテキスト節約）
 - [ ] 権限設定: `/permissions` で allowlist を設定、または Auto Mode を検討
 - [ ] フックで必須チェックを自動化（eslint、typecheck等）
