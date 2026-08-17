@@ -1,6 +1,13 @@
 # Claude Code 設計パターン集
 
-最終更新: 2026-08-10
+最終更新: 2026-08-17
+
+## 直近の主要変更（2026-08-17）
+
+- **サブエージェントのデフォルトネスト深さが「3層」と明確化（誤記訂正）**: 公式ドキュメントで「3 layers deep below main conversation」と明記。以前の「最大5段階（v2.1.172+）」は誤記だった（5段階は設定上限値であり、デフォルト値ではなかった可能性が高い）。
+- **同時実行サブエージェント数の上限が明文化**: デフォルト 20 同時実行まで。超過するとスポーン失敗エラー。`CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS` 環境変数で上限変更可能。`ultracode` 有効時は免除。
+- **`/subtask` コマンドが公式確認**: 現在の会話を継承したフォーク型サブエージェントを起動するコマンド（`/fork` と同機能）。`Agent(fork)` を deny ルールに追加するとフォーク禁止。
+- **バックグラウンドサブエージェントの利用可能ツールセット列挙**: built-in ツール 19 種（`Artifact`, `Monitor`, `SendMessage`, `EnterWorktree`, `ExitWorktree` 等）＋全 MCP ツール。フォアグラウンドサブエージェントよりも制限あり。
 
 ## 直近の主要変更（2026-08-10）
 
@@ -1249,21 +1256,48 @@ claude --sandbox
 
 ## ネストサブエージェントパターン（v2.1.172+）
 
-サブエージェントが自分のサブエージェントをスポーンできるようになった（最大5段階）。
+サブエージェントが自分のサブエージェントをスポーンできる。デフォルトはメインの下 **3 層まで**。
 
 ```
 メインセッション（orchestrator）
-  └── L1: research-coordinator
-        ├── L2: file-searcher（Explore）
+  └── L1: research-coordinator     ← 1層目
+        ├── L2: file-searcher（Explore）  ← 2層目
         └── L2: code-analyzer（general-purpose）
-              └── L3: security-validator
-                    └── L4: report-generator
+              └── L3: security-validator  ← 3層目（デフォルト上限）
 ```
+
+**ネスト深さの設定（`CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH`）:**
+
+```json
+{
+  "env": {
+    "CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH": "2"
+  }
+}
+```
+
+- デフォルト: 3層（メインセッションから数えて3段まで）
+- `1` に設定するとネスト完全無効（サブエージェントはサブエージェントを生成できない）
+- 上限到達時は `Agent` ツールが提供されない（フォークはエラーになる）
+
+**同時実行上限（`CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS`）:**
+
+```json
+{
+  "env": {
+    "CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS": "50"
+  }
+}
+```
+
+- デフォルト: 20 同時実行まで
+- 上限到達時は新規スポーンがエラー
+- `ultracode` 有効時は制限免除
 
 **設計原則:**
 - 各レベルのサブエージェントは単一責務に限定する（コンテキスト節約）
-- L3 以深は軽量モデル（haiku）を推奨（コスト管理）
-- 最大5段階は複雑なマルチエージェントワークフロー向け上限
+- L2 以深は軽量モデル（haiku）を推奨（コスト管理）
+- 大量並列処理が必要な場合は `CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS` を増やすか ultracode を使用
 
 ```yaml
 # .claude/agents/research-coordinator.md
