@@ -1,6 +1,13 @@
 # Claude Code 設計パターン集
 
-最終更新: 2026-08-17
+最終更新: 2026-08-24
+
+## 直近の主要変更（2026-08-24）
+
+- **バージョン v2.1.234+ 確認**: memory ドキュメントに `CLAUDE_CODE_PROJECT_DIR_NAME` が v2.1.234+ 必須と明記。前回の v2.1.222+ から12以上バージョンが進行していたことが判明。
+- **新フックイベント3件**: `TeammateIdle`（Agent teams チームメイトアイドル時）/ `DirectoryAdded`（セッション途中でディレクトリ追加時）/ `UserPromptExpansion`（コマンドがプロンプトに展開されたとき）が公式ドキュメントに追加確認。
+- **`/batch` コマンド**: 変更を5〜30サブエージェントに自動分散し、各ワークツリーでPRを開く新コマンドが公式ベストプラクティスに明記。
+- **`CLAUDE_CODE_PROJECT_DIR_NAME` 環境変数（v2.1.234+）**: `CLAUDE_CONFIG_DIR` と組み合わせて複数リポジトリ間で Auto Memory を共有できる。
 
 ## 直近の主要変更（2026-08-17）
 
@@ -131,6 +138,16 @@
 - Session B（Reviewer）: コードレビュー（異なるコンテキストで偏りなし）
 
 ### Fan-out パターン（大規模処理）
+
+#### `/batch` コマンド（宣言的 Fan-out、2026-08-24 公式確認）
+
+```text
+/batch <instruction>
+```
+
+git リポジトリ内で実行すると、Claude が変更を **5〜30 個のサブエージェント**に自動分割し、各サブエージェントが独立したワークツリーで作業してプルリクエストを開く。従来のスクリプトループより宣言的でシンプル。
+
+#### スクリプトループ（カスタム制御）
 
 ```bash
 for file in $(cat files.txt); do
@@ -671,6 +688,54 @@ Claude Code の設定ファイルが変更された際に発火。設定変更�
 
 サブエージェントタイプ（`general-purpose`, `Explore`, カスタム名）でフィルタリング可能。
 
+### TeammateIdle（Agent teams チームメイトアイドル）（2026-08-24確認）
+
+Agent teams でチームメイトがアイドル状態になったときに発火する。コーディネーターが次の指示を割り当てるパターンに活用：
+
+```json
+{
+  "hooks": {
+    "TeammateIdle": [
+      {
+        "hooks": [{ "type": "command", "command": "assign-next-task.sh" }]
+      }
+    ]
+  }
+}
+```
+
+### DirectoryAdded（セッション途中でディレクトリ追加時）（2026-08-24確認）
+
+セッション中に新しいディレクトリが追加されたときに発火する：
+
+```json
+{
+  "hooks": {
+    "DirectoryAdded": [
+      {
+        "hooks": [{ "type": "command", "command": "setup-new-dir.sh" }]
+      }
+    ]
+  }
+}
+```
+
+### UserPromptExpansion（コマンドがプロンプトに展開されたとき）（2026-08-24確認）
+
+`/skill` 呼び出しや `/command` などのコマンドがプロンプトテキストに展開されたタイミングで発火する：
+
+```json
+{
+  "hooks": {
+    "UserPromptExpansion": [
+      {
+        "hooks": [{ "type": "command", "command": "log-command-expansion.sh" }]
+      }
+    ]
+  }
+}
+```
+
 ### StopFailure のエラータイプマッチ（2026-07-06確認）
 
 ```json
@@ -962,6 +1027,24 @@ Move-Item source.txt destination.txt
 ```
 
 **設計指針**: `isolation: worktree` サブエージェントでは git 操作をシンプルな単一コマンドにとどめる。複数コマンドをチェーンする場合はシェルスクリプトに切り出し、そのスクリプト内で完結させる（スクリプト自体はワークツリー内の WD で実行されるため OK）。
+
+### `CLAUDE_CODE_PROJECT_DIR_NAME` による Auto Memory 共有（v2.1.234+）
+
+複数リポジトリで同一の Auto Memory を共有したい場合に使用。`CLAUDE_CONFIG_DIR` と組み合わせて設定する：
+
+```bash
+# 複数リポジトリ間でAuto Memoryを共有
+CLAUDE_CONFIG_DIR=~/.claude-shared CLAUDE_CODE_PROJECT_DIR_NAME=my-project claude
+```
+
+保存先: `<config dir>/projects/my-project/memory/`
+
+**ユースケース:**
+- 複数の git ワークツリーで同じプロジェクト知識を共有
+- モノレポの複数サブディレクトリで同じ Auto Memory を使う
+- 組織共通の Auto Memory をチームで共有する
+
+v2.1.234 以降が必要。`CLAUDE_CODE_PROJECT_DIR_NAME` が設定されていない場合は git リポジトリ名からプロジェクトディレクトリが決定される（従来の動作）。
 
 ### claudeMdExcludes（モノレポ向け）（2026-05-25+）
 
