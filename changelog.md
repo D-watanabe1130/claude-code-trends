@@ -2,6 +2,12 @@
 
 ---
 
+## 2026-08-31
+
+公式ドキュメント4種（best-practices/sub-agents/hooks/memory）を取得。外部GitHubソースはMCPスコープ制限により今週も取得不可。最大の発見は **バージョン v2.1.248+ の確認** で、サブエージェントドキュメントに「`experimental.cacheTtl` は v2.1.248+ 必須」、フックドキュメントに「exit 0 での JSON パース失敗を non-blocking エラーとして報告（v2.1.248+）」と明記されており、前回の v2.1.234+ から少なくとも14バージョン進行し、v2.1.232+・v2.1.238+・v2.1.246+・v2.1.248+ の4マイルストーンが新規判明した。サブエージェント分野では **`maxTurns` フロントマターフィールド（v2.1.246+）** が新規確認され、サブエージェントの最大エージェントターン数を制限して暴走防止・コスト管理が可能になった。また **`experimental: { cacheTtl: '5m' | '1h' }` フィールド（v2.1.248+）** により、プロンプトキャッシュ TTL の実験的オーバーライドが可能に。フック分野では **`PreModelSwitch`/`PostModelSwitch`** の2新規イベントが公式ドキュメントで初確認され、`PreModelSwitch` は exit 2 でモデル切り替えをブロックできる。組織制御強化として **`allowedHttpHookUrls`**（HTTP フック URL アロウリスト）と **`httpHookAllowedEnvVars`**（ヘッダー用環境変数アロウリスト）が公式確認された。さらに `SessionStart` マッチャーに `fork` が追加、`Notification` マッチャーに `elicitation_dialog`・`quota_auto_resume_fired` が追加。ベストプラクティスでは `/verify` コマンドと `--permission-mode plan` CLI フラグが公式ドキュメントに明記された。
+
+---
+
 ## 2026-08-24
 
 公式ドキュメント4種（best-practices/sub-agents/hooks/memory）を取得。外部GitHubソースはMCPスコープ制限により今週も取得不可。最大の発見は **バージョン v2.1.234+ の確認**で、memory ドキュメントに「`CLAUDE_CODE_PROJECT_DIR_NAME` は Claude Code v2.1.234 以降が必要」と明記されており、前回確認の v2.1.222+ から少なくとも12バージョン進行したことが判明した。新規コマンドとして **`/batch <instruction>`** が公式ベストプラクティスに追加された。git リポジトリ内でこのコマンドを実行すると変更を5〜30個のサブエージェントに自動分散し、各ウークツリーでPRを開く Fan-out の新標準コマンドである。フック分野では **`TeammateIdle`・`DirectoryAdded`・`UserPromptExpansion`** の3イベントが公式ドキュメントで新規確認された（前週まで知識ベースに記録なし）。Auto Memory 面では **`CLAUDE_CODE_PROJECT_DIR_NAME`** 環境変数が文書化され、`CLAUDE_CONFIG_DIR` と合わせて設定すると複数リポジトリで同一の Auto Memory を共有できるようになった（v2.1.234+ 必須）。

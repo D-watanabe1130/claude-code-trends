@@ -1,6 +1,18 @@
 # Claude Code 設計パターン集
 
-最終更新: 2026-08-24
+最終更新: 2026-08-31
+
+## 直近の主要変更（2026-08-31）
+
+- **バージョン v2.1.248+ 確認**: v2.1.232+・v2.1.238+・v2.1.246+・v2.1.248+ の4マイルストーン新規判明。
+- **`maxTurns` フロントマターフィールド（v2.1.246+）**: サブエージェントの最大ターン数制限。到達時は「partial」マークで Claude が継続可能。
+- **`experimental.cacheTtl`（v2.1.248+）**: サブエージェントのプロンプトキャッシュ TTL を `5m` または `1h` で実験的に設定可能。
+- **インライン MCP サーバートラスト細分化（v2.1.238+）**: `.claude/agents/` のインライン定義はフォルダトラスト必須。参照形式・ユーザーレベルは不要。
+- **`PreModelSwitch`/`PostModelSwitch` フックイベント**: 新規確認。`PreModelSwitch` は exit 2 でモデル切り替えをブロック可能。
+- **`SessionStart` `fork` マッチャー**: 新規確認（既存の startup/resume/clear/compact に追加）。
+- **`Notification` マッチャー追加**: `elicitation_dialog`・`quota_auto_resume_fired` が公式確認。
+- **`allowedHttpHookUrls` / `httpHookAllowedEnvVars`**: 組織レベルの HTTP フック制御設定が公式確認。
+- **`disableAllHooks` とCLIオーバーライド**: `--settings '{"disableAllHooks": true}'` でワンショット無効化可能。マネージドフックは除外。
 
 ## 直近の主要変更（2026-08-24）
 
@@ -119,6 +131,113 @@
 - **`.claude/skills` 自動ロード**（v2.1.157）: プラグインマーケットプレイス不要でローカルプラグインを自動ロード
 - **Auto Mode の拡大**（v2.1.158）: Bedrock/Vertex/Foundry でも利用可能（`CLAUDE_CODE_ENABLE_AUTO_MODE=1` でオプトイン）
 - **コミュニティエコシステム全体像判明**（初回GitHub取得）: 主要ワークフロー13個、クロスモデルワークフロー新カテゴリ（Router/Plugin/MCP型）
+
+### `maxTurns` によるサブエージェントのターン制限（v2.1.246+）
+
+```yaml
+---
+name: bounded-researcher
+description: 調査タスクをターン数制限付きで実行
+maxTurns: 10
+model: haiku
+---
+```
+
+- `maxTurns` に達したサブエージェントは「partial」としてマークされ、Claude が継続を指示可能
+- 暴走防止・長時間タスクのコスト管理に有効
+- `maxTurns` 未達でも Claude が必要に応じて継続を指示できる（再開可能）
+
+### `experimental.cacheTtl` によるキャッシュ TTL 制御（v2.1.248+）
+
+```yaml
+---
+name: frequently-called-agent
+description: 頻繁に呼ばれる調査エージェント
+experimental:
+  cacheTtl: 1h   # または 5m
+---
+```
+
+- `5m`（5分）または `1h`（1時間）を指定可能
+- 頻繁に起動するサブエージェントのプロンプトキャッシュヒット率を向上
+- `experimental` フィールドのため将来的に変更される可能性あり
+
+### `PreModelSwitch` / `PostModelSwitch` フックパターン（新規確認）
+
+```json
+{
+  "hooks": {
+    "PreModelSwitch": [
+      {
+        "matcher": "claude-haiku-4-5-20251001",
+        "hooks": [{ "type": "command", "command": "block-haiku-switch.sh" }]
+      }
+    ],
+    "PostModelSwitch": [
+      {
+        "hooks": [{ "type": "command", "command": "log-model-change.sh" }]
+      }
+    ]
+  }
+}
+```
+
+| イベント | ブロック可否 | 用途 |
+|---------|------------|------|
+| `PreModelSwitch` | **Yes（exit 2 でブロック）** | モデル切り替えの事前承認・ポリシー適用 |
+| `PostModelSwitch` | No | モデル変更のログ記録・監査 |
+
+マッチャーにはモデルID・モデルID の `|` 区切りリストを指定可能（regex も使用可）。
+
+### HTTP フックの組織制御パターン（新規確認）
+
+```json
+// managed-settings.json または settings.json
+{
+  "allowedHttpHookUrls": [
+    "https://api.company.com/hooks/*",
+    "https://internal.monitoring.example.com/*"
+  ],
+  "httpHookAllowedEnvVars": ["CI_TOKEN", "GITHUB_TOKEN", "SLACK_WEBHOOK"]
+}
+```
+
+- `allowedHttpHookUrls`: 全ソース（user/project/local/plugin）の HTTP フックに適用される URL アロウリスト。マッチしない URL はフックがスキップされる
+- `httpHookAllowedEnvVars`: フックヘッダーで参照できる環境変数の allowlist
+- 複数スコープにまたがってマージされる（組織レベルと個人レベルの両方で設定可）
+
+**設計原則**: 組織内で外部エンドポイントへのフックを許可する場合は `allowedHttpHookUrls` で必ず制限する。
+
+### `SessionStart` fork マッチャーパターン（新規確認）
+
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "fork",
+        "hooks": [{ "type": "command", "command": "fork-session-setup.sh" }]
+      },
+      {
+        "matcher": "startup",
+        "hooks": [{ "type": "command", "command": "new-session-setup.sh" }]
+      }
+    ]
+  }
+}
+```
+
+`SessionStart` マッチャーの全値:
+
+| 値 | 意味 |
+|----|------|
+| `startup` | 新規セッション開始 |
+| `resume` | セッション再開 |
+| `clear` | `/clear` によるリセット後 |
+| `compact` | `/compact` 後の再開 |
+| `fork` | **（新規確認）** フォークによる開始 |
+
+---
 
 ## アーキテクチャパターン
 

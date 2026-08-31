@@ -1,12 +1,12 @@
 # 最新トレンドサマリー
 
-最終更新: 2026-08-24
+最終更新: 2026-08-31
 
 ---
 
 ## 最新バージョン
 
-**v2.1.234+**（前回: v2.1.222+、memory ドキュメントに `CLAUDE_CODE_PROJECT_DIR_NAME` が v2.1.234+ 必須と明記）
+**v2.1.248+**（前回: v2.1.234+、`experimental.cacheTtl` と exit 0 JSON パース修正に v2.1.248+ 必須と明記）
 
 主要マイルストーン:
 - v2.1.178+: ネストディレクトリで同名エージェントはCWD最近傍が優先
@@ -18,37 +18,43 @@
 - v2.1.203+: `isolation: worktree` Bash バグ修正
 - v2.1.205+: `/doctor` コマンド・`--append-subagent-system-prompt` フラグ
 - v2.1.206+: `/doctor` が CLAUDE.md トリム提案機能を追加
-- v2.1.207+: プラグインフックの `${user_config.*}` 参照禁止 / 無効 glob パターンが「マッチなし」に変更（Read ツール失敗から改善）
-- v2.1.210+: MEMORY.md 書き込み後のサイズチェック強化 / `isolation: worktree` の WD チェックがリポジトリ全体に拡張
+- v2.1.207+: プラグインフックの `${user_config.*}` 参照禁止 / 無効 glob パターンが「マッチなし」に変更
+- v2.1.210+: MEMORY.md 書き込み後のサイズチェック強化 / `isolation: worktree` の WD チェックがリポジトリ全体に拡張 / サブエージェント出力スキャン（instruction-shaped パターン検出）
 - v2.1.211+: MEMORY.md 測定からフロントマター/コメント除外 / `--setting-sources project` 除外でパス限定ルールも確実スキップ
 - v2.1.213+: `/import` コマンド（他コーディングエージェント設定の移行）
 - v2.1.214+: Auto Memory `modified` フロントマターフィールド / フック exit 2 の JSON 検証失敗時でも確実ブロック
 - v2.1.216+: `/memory` がGUIエディタ開放中もセッション継続 / `isolation: worktree` の Bash コマンド自体の git リダイレクトチェック
 - v2.1.217+: パス限定ルールのブレース展開予算制限（1,000パターン / 4 MiB）
 - v2.1.218+: サブエージェントフロントマターフックへのワークスペーストラスト適用
-- v2.1.222+: `availableModels` allowlist のブロックファミリーエイリアス処理改善（許可済み最新バージョンへ代替）
+- v2.1.219+: `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` 環境変数（バージョン確定）
+- v2.1.222+: `availableModels` allowlist のブロックファミリーエイリアス処理改善
+- v2.1.232+: `CLAUDE_CODE_FORK_SUBAGENT` インタラクティブモードでデフォルトON
 - v2.1.234+: `CLAUDE_CODE_PROJECT_DIR_NAME` 環境変数（Auto Memory の複数リポジトリ間共有）
+- v2.1.238+: `.claude/agents/` のインライン MCP サーバー定義にフォルダトラスト要件を追加
+- v2.1.246+: `maxTurns` フロントマターフィールド / `maxTurns` 到達サブエージェントを「partial」としてマーク
+- v2.1.248+: `experimental: { cacheTtl: '5m' | '1h' }` サブエージェント実験フィールド / exit 0 での JSON パース失敗を non-blocking エラーとして報告
 
 ---
 
-## 今週のホットトピック（2026-08-24）
+## 今週のホットトピック（2026-08-31）
 
-1. **バージョン v2.1.234+ 確認**: memory ドキュメントに「`CLAUDE_CODE_PROJECT_DIR_NAME` は Claude Code v2.1.234 以降が必要」と明記。v2.1.222+ から少なくとも12バージョン進行したことが確認された。
-2. **新規フックイベント3件確認**: `TeammateIdle`（Agent team チームメイトがアイドル状態になったとき）/ `DirectoryAdded`（セッション途中でディレクトリ追加時）/ `UserPromptExpansion`（コマンドがプロンプトに展開されたとき）が公式ドキュメントに新規掲載。
-3. **`/batch` コマンド**: git リポジトリ内で変更を5〜30サブエージェントに自動分散し、各ワークツリーでPRを開く新コマンドが公式ベストプラクティスに明記。Fan-out パターンの新標準。
-4. **`CLAUDE_CODE_PROJECT_DIR_NAME` 環境変数**: `CLAUDE_CONFIG_DIR` と合わせて設定すると、どのリポジトリで起動しても同じ Auto Memory を共有できる（v2.1.234+）。
+1. **バージョン v2.1.248+ 確認**: `experimental.cacheTtl`（v2.1.248+）と exit 0 JSON パース修正（v2.1.248+）が公式ドキュメントに明記。前回の v2.1.234+ から少なくとも14バージョン進行、v2.1.232+・v2.1.238+・v2.1.246+・v2.1.248+ の4マイルストーンが新規判明。
+2. **サブエージェント `maxTurns` フィールド（v2.1.246+）**: 最大エージェントターン数を制限する新フロントマターフィールド。到達時はサブエージェントが「partial」としてマークされ、Claude が継続可能。暴走防止・コスト管理に有効。
+3. **`PreModelSwitch`/`PostModelSwitch` フックイベント**: モデル切り替え前後に発火する新フックイベントが公式ドキュメントで初確認。`PreModelSwitch` は exit 2 でモデル切り替えを阻止できる（ブロック可能）。企業ポリシーでのモデル使用管理に活用可能。
+4. **HTTP フックの組織制御強化**: `allowedHttpHookUrls`（URLアロウリスト）と `httpHookAllowedEnvVars`（環境変数アロウリスト）が組織レベルの設定として公式確認。全ソースのフックにまたがって適用される。
 
 ---
 
-## 前週（2026-08-17）との主要差分
+## 前週（2026-08-24）との主要差分
 
 | カテゴリ | 変更内容 |
 |---------|---------|
-| バージョン | **v2.1.234+** 確認（前回は v2.1.222+ まで） |
-| フック | `TeammateIdle` / `DirectoryAdded` / `UserPromptExpansion` の3イベント新規確認 |
-| コマンド | `/batch <instruction>` — 5〜30サブエージェントへの自動分散処理（公式ベストプラクティスに追加） |
-| Auto Memory | `CLAUDE_CODE_PROJECT_DIR_NAME` で複数リポジトリ間共有が可能（v2.1.234+） |
-| Setup フック | matcher 値 `init` / `maintenance` が公式確認 |
+| バージョン | **v2.1.248+** 確認（前回は v2.1.234+）。4マイルストーン新規判明 |
+| サブエージェント | `maxTurns`（v2.1.246+）・`experimental.cacheTtl`（v2.1.248+）・インライン MCP サーバートラスト細分化（v2.1.238+） |
+| フック | `PreModelSwitch`/`PostModelSwitch` 2イベント / `SessionStart` に `fork` マッチャー / `Notification` に `elicitation_dialog`・`quota_auto_resume_fired` |
+| フック制御 | `disableAllHooks` + CLI オーバーライド / `allowedHttpHookUrls` / `httpHookAllowedEnvVars` |
+| ベストプラクティス | `/verify` コマンド・`--permission-mode plan` CLI フラグが公式明記 |
+| 出力スキャン | v2.1.210+ サブエージェント出力スキャンの詳細（バックスラッシュ挿入・マーカー行）を初確認 |
 
 ---
 
@@ -59,10 +65,13 @@
 - `/subtask` コマンドが公式確認（フォーク型サブエージェント起動）
 - バックグラウンドサブエージェントの利用可能ツールセット（19種）が明記
 - Claude 5 ファミリー（`claude-opus-5` / `claude-sonnet-5` / `claude-fable-5`）がサブエージェントで利用可能
-- `Ctrl+G` でプランモードの計画をテキストエディタで直接編集（公式ベストプラクティスに明記）
+- `Ctrl+G` でプランモードの計画をテキストエディタで直接編集
 - `--no-session-persistence` フラグ: `-p` 実行はデフォルトでセッション保存
 - フック入力 `effort` フィールドは `{ level: string }` オブジェクト型
 - `/context` でCLAUDE.md読み込み確認、`/memory` でファイル編集
+- `TeammateIdle` / `DirectoryAdded` / `UserPromptExpansion` フックイベント（v2.1.234+ 週確認）
+- `/batch <instruction>` コマンド（5〜30サブエージェントへの自動分散）
+- `CLAUDE_CODE_PROJECT_DIR_NAME` で複数リポジトリ間 Auto Memory 共有（v2.1.234+）
 - Auto Memory に `modified` タイムスタンプ（ISO 8601）（v2.1.214+）
 - フック exit 2 が JSON 検証失敗でも確実ブロック（v2.1.214+）
 - `/memory` がGUIエディタ開放中もセッション継続（v2.1.216+）
@@ -86,7 +95,6 @@
 - MCP tool search: デフォルト有効
 - 並列化3段階: Subagents / Background agents / Agent teams
 - `fallbackModel`: 最大3つのフォールバック
-- ネストサブエージェント5段階（v2.1.172+）
 - ダイナミックワークフロー（v2.1.154+）
 - Auto Memory（v2.1.59+）
 - `SessionEnd` フックイベント（clear/resume/logout/prompt_input_exit/bypass_permissions_disabled/other でマッチ）
