@@ -1,12 +1,12 @@
 # 最新トレンドサマリー
 
-最終更新: 2026-08-31
+最終更新: 2026-09-07
 
 ---
 
 ## 最新バージョン
 
-**v2.1.248+**（前回: v2.1.234+、`experimental.cacheTtl` と exit 0 JSON パース修正に v2.1.248+ 必須と明記）
+**v2.1.261+**（前回: v2.1.248+、`--append-subagent-system-prompt-file` と停止状態サブエージェント再開が v2.1.261+ 必須と明記）
 
 主要マイルストーン:
 - v2.1.178+: ネストディレクトリで同名エージェントはCWD最近傍が優先
@@ -31,30 +31,33 @@
 - v2.1.232+: `CLAUDE_CODE_FORK_SUBAGENT` インタラクティブモードでデフォルトON
 - v2.1.234+: `CLAUDE_CODE_PROJECT_DIR_NAME` 環境変数（Auto Memory の複数リポジトリ間共有）
 - v2.1.238+: `.claude/agents/` のインライン MCP サーバー定義にフォルダトラスト要件を追加
+- v2.1.239+: `claudeMdExcludes` でシンボリックリンクのリンク元・リンク先両パスでマッチ可能に
 - v2.1.246+: `maxTurns` フロントマターフィールド / `maxTurns` 到達サブエージェントを「partial」としてマーク
 - v2.1.248+: `experimental: { cacheTtl: '5m' | '1h' }` サブエージェント実験フィールド / exit 0 での JSON パース失敗を non-blocking エラーとして報告
+- v2.1.257+: `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` 環境変数（全サブエージェントモデルの強制上書き）
+- v2.1.261+: `--append-subagent-system-prompt-file` フラグ（ファイルからサブエージェントシステムプロンプト追記）/ 停止状態からのサブエージェント再開
 
 ---
 
-## 今週のホットトピック（2026-08-31）
+## 今週のホットトピック（2026-09-07）
 
-1. **バージョン v2.1.248+ 確認**: `experimental.cacheTtl`（v2.1.248+）と exit 0 JSON パース修正（v2.1.248+）が公式ドキュメントに明記。前回の v2.1.234+ から少なくとも14バージョン進行、v2.1.232+・v2.1.238+・v2.1.246+・v2.1.248+ の4マイルストーンが新規判明。
-2. **サブエージェント `maxTurns` フィールド（v2.1.246+）**: 最大エージェントターン数を制限する新フロントマターフィールド。到達時はサブエージェントが「partial」としてマークされ、Claude が継続可能。暴走防止・コスト管理に有効。
-3. **`PreModelSwitch`/`PostModelSwitch` フックイベント**: モデル切り替え前後に発火する新フックイベントが公式ドキュメントで初確認。`PreModelSwitch` は exit 2 でモデル切り替えを阻止できる（ブロック可能）。企業ポリシーでのモデル使用管理に活用可能。
-4. **HTTP フックの組織制御強化**: `allowedHttpHookUrls`（URLアロウリスト）と `httpHookAllowedEnvVars`（環境変数アロウリスト）が組織レベルの設定として公式確認。全ソースのフックにまたがって適用される。
+1. **バージョン v2.1.261+ 確認**: 前回の v2.1.248+ から少なくとも13バージョン進行、v2.1.257+・v2.1.261+ の2マイルストーンが新規判明。
+2. **`CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1`（v2.1.257+）**: 全サブエージェントを `CLAUDE_CODE_SUBAGENT_MODEL` に強制する新環境変数。フロントマターの `model` フィールドよりも優先される。例外は `model: inherit` のフォークと `context: fork` のスキル。コスト管理・組織ポリシー適用に有効。
+3. **`--append-subagent-system-prompt-file` フラグ（v2.1.261+）**: テキストファイルから全サブエージェントのシステムプロンプトに追記する新フラグ。長大なポリシー文書をファイルで管理してサブエージェントに一括適用できる。`--append-subagent-system-prompt`（インライン版）の補完機能。
+4. **停止状態からのサブエージェント再開（v2.1.261+）**: `TaskStop` で停止したサブエージェントも `SendMessage` で再開可能に。完了・実行中に加えて停止状態も再開対象となった。
 
 ---
 
-## 前週（2026-08-24）との主要差分
+## 前週（2026-08-31）との主要差分
 
 | カテゴリ | 変更内容 |
 |---------|---------|
-| バージョン | **v2.1.248+** 確認（前回は v2.1.234+）。4マイルストーン新規判明 |
-| サブエージェント | `maxTurns`（v2.1.246+）・`experimental.cacheTtl`（v2.1.248+）・インライン MCP サーバートラスト細分化（v2.1.238+） |
-| フック | `PreModelSwitch`/`PostModelSwitch` 2イベント / `SessionStart` に `fork` マッチャー / `Notification` に `elicitation_dialog`・`quota_auto_resume_fired` |
-| フック制御 | `disableAllHooks` + CLI オーバーライド / `allowedHttpHookUrls` / `httpHookAllowedEnvVars` |
-| ベストプラクティス | `/verify` コマンド・`--permission-mode plan` CLI フラグが公式明記 |
-| 出力スキャン | v2.1.210+ サブエージェント出力スキャンの詳細（バックスラッシュ挿入・マーカー行）を初確認 |
+| バージョン | **v2.1.261+** 確認（前回は v2.1.248+）。2マイルストーン新規判明 |
+| サブエージェント | `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1`（v2.1.257+）・`--append-subagent-system-prompt-file`（v2.1.261+）・停止状態からの再開（v2.1.261+） |
+| フック | `permissionDecision: "skip"` の第3オプション初確認・`statusMessage` フィールド公式確認 |
+| 設定制御 | `disableAllHooks: false` のプロジェクト→ユーザー上書きが明確化 |
+| CLAUDE.md | `claudeMdExcludes` の symlink 両パスマッチ（v2.1.239+）が明記 |
+| タイムアウト | `PreModelSwitch`/`PostModelSwitch` の30秒・`SessionEnd` の1.5秒バジェット明確化 |
 
 ---
 
@@ -105,6 +108,12 @@
 - スキル `disable-model-invocation: true` フィールド
 - `AGENTS.md` 互換パターン（`@AGENTS.md` インポートまたは symlink）
 - `claudeMdExcludes` でモノレポ CLAUDE.md を選択的除外
+- `PreModelSwitch`/`PostModelSwitch` フックイベント（前回確認）
+- `SessionStart` マッチャーに `fork` 追加（前回確認）
+- `Notification` マッチャーに `elicitation_dialog`・`quota_auto_resume_fired`（前回確認）
+- `allowedHttpHookUrls` / `httpHookAllowedEnvVars`（前回確認）
+- `maxTurns` フロントマターフィールド（v2.1.246+、前回確認）
+- `experimental.cacheTtl`（v2.1.248+、前回確認）
 
 ---
 

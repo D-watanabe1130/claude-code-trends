@@ -2,6 +2,12 @@
 
 ---
 
+## 2026-09-07
+
+公式ドキュメント4種（best-practices/sub-agents/hooks/memory）を取得。外部GitHubソースはMCPスコープ制限により今週も取得不可。最大の発見は **バージョン v2.1.261+ の確認** で、前回の v2.1.248+ から少なくとも13バージョン進行し、v2.1.257+・v2.1.261+ の2マイルストーンが新規判明した。サブエージェント分野では3つの重要な新機能が確認された。**`CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1`（v2.1.257+）** は全サブエージェントを `CLAUDE_CODE_SUBAGENT_MODEL` に強制する環境変数で、フロントマターの `model` フィールドよりも優先される（例外: `model: inherit` のフォーク・`context: fork` のスキル）。**`--append-subagent-system-prompt-file` フラグ（v2.1.261+）** はファイルから全サブエージェントのシステムプロンプト末尾に追記する機能で、長大な組織ポリシー文書の管理に有効。**停止状態からのサブエージェント再開（v2.1.261+）** により、`TaskStop` で停止したサブエージェントも `SendMessage` で再開できるようになった。フック分野では `permissionDecision: "skip"` が第3の権限決定オプションとして初確認され、従来の "allow"/"deny" に加えて処理スキップが可能に。また `statusMessage` フィールドでフック実行中のスピナーメッセージをカスタマイズできることが公式確認された。設定面では `disableAllHooks: false` をプロジェクト設定に書くとユーザー設定の `true` を上書きできることが明確化され、`claudeMdExcludes` のシンボリックリンク対応（v2.1.239+）がリンク元・リンク先両パスで機能するようになったことも記録された。
+
+---
+
 ## 2026-08-31
 
 公式ドキュメント4種（best-practices/sub-agents/hooks/memory）を取得。外部GitHubソースはMCPスコープ制限により今週も取得不可。最大の発見は **バージョン v2.1.248+ の確認** で、サブエージェントドキュメントに「`experimental.cacheTtl` は v2.1.248+ 必須」、フックドキュメントに「exit 0 での JSON パース失敗を non-blocking エラーとして報告（v2.1.248+）」と明記されており、前回の v2.1.234+ から少なくとも14バージョン進行し、v2.1.232+・v2.1.238+・v2.1.246+・v2.1.248+ の4マイルストーンが新規判明した。サブエージェント分野では **`maxTurns` フロントマターフィールド（v2.1.246+）** が新規確認され、サブエージェントの最大エージェントターン数を制限して暴走防止・コスト管理が可能になった。また **`experimental: { cacheTtl: '5m' | '1h' }` フィールド（v2.1.248+）** により、プロンプトキャッシュ TTL の実験的オーバーライドが可能に。フック分野では **`PreModelSwitch`/`PostModelSwitch`** の2新規イベントが公式ドキュメントで初確認され、`PreModelSwitch` は exit 2 でモデル切り替えをブロックできる。組織制御強化として **`allowedHttpHookUrls`**（HTTP フック URL アロウリスト）と **`httpHookAllowedEnvVars`**（ヘッダー用環境変数アロウリスト）が公式確認された。さらに `SessionStart` マッチャーに `fork` が追加、`Notification` マッチャーに `elicitation_dialog`・`quota_auto_resume_fired` が追加。ベストプラクティスでは `/verify` コマンドと `--permission-mode plan` CLI フラグが公式ドキュメントに明記された。

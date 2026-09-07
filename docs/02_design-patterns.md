@@ -1,6 +1,18 @@
 # Claude Code 設計パターン集
 
-最終更新: 2026-08-31
+最終更新: 2026-09-07
+
+## 直近の主要変更（2026-09-07）
+
+- **バージョン v2.1.261+ 確認**: v2.1.257+・v2.1.261+ の2マイルストーン新規判明。
+- **`CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1`（v2.1.257+）**: 全サブエージェントを `CLAUDE_CODE_SUBAGENT_MODEL` に強制。フロントマター `model` より優先。コスト管理・組織ポリシー適用に有効。
+- **`--append-subagent-system-prompt-file` フラグ（v2.1.261+）**: ファイルからサブエージェントシステムプロンプトを一括追記する新フラグ（インライン版 v2.1.205+ の補完）。
+- **停止状態からのサブエージェント再開（v2.1.261+）**: `TaskStop` で停止したサブエージェントも `SendMessage` で再開可能に。
+- **`permissionDecision: "skip"` 第3オプション**: フック権限決定に "skip" が追加（"allow"/"deny" に加え処理スキップが可能）。
+- **`statusMessage` フィールド公式確認**: フック実行中のスピナーメッセージをカスタマイズ可能。
+- **`disableAllHooks: false` 上書き明確化**: プロジェクト設定でユーザー設定の `disableAllHooks: true` を上書き可能。
+- **`claudeMdExcludes` symlink 両パスマッチ（v2.1.239+）**: リンク元・リンク先どちらのパスでもマッチ可能に。
+- **`PreModelSwitch`/`PostModelSwitch` タイムアウト30秒**: 両イベントのタイムアウト制限が公式確認。
 
 ## 直近の主要変更（2026-08-31）
 
@@ -401,6 +413,58 @@ CI/CD でのユースケース:
 - 組織セキュリティポリシーの一括適用
 - 言語・応答形式の統一強制
 - デバッグ情報追加（ロギング指示の一括注入）
+
+### `CLAUDE_CODE_SUBAGENT_MODEL_FORCE` による全サブエージェントモデル強制（v2.1.257+）
+
+```json
+// settings.json または .claude/settings.json
+{
+  "env": {
+    "CLAUDE_CODE_SUBAGENT_MODEL": "claude-haiku-4-5-20251001",
+    "CLAUDE_CODE_SUBAGENT_MODEL_FORCE": "1"
+  }
+}
+```
+
+**モデル解決の優先順位（force=1 の場合）:**
+
+| 優先順位 | ソース |
+|---------|------|
+| 1（最高） | `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` + `CLAUDE_CODE_SUBAGENT_MODEL` |
+| 2 | 呼び出し時の `model` パラメータ（force=1 でも上書き可能） |
+| 3 | フロントマターの `model` フィールド（force=1 の場合は無効） |
+| 4 | `CLAUDE_CODE_SUBAGENT_MODEL`（force なし） |
+| 5 | メイン会話のモデル |
+
+**例外（force でも上書きされない）:**
+- `model: inherit` が設定されたフォークサブエージェント
+- `context: fork` が設定されたスキル
+
+```bash
+# CLI での使用例（CI/CD でのコスト管理）
+CLAUDE_CODE_SUBAGENT_MODEL=claude-haiku-4-5-20251001 \
+CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1 \
+  claude -p "investigate all test failures and summarize"
+```
+
+### `--append-subagent-system-prompt-file` によるファイルベース一括追記（v2.1.261+）
+
+```bash
+# 長大なポリシー文書をファイルで管理して一括適用
+claude --append-subagent-system-prompt-file /etc/claude/org-policy.txt \
+  -p "investigate and fix all security vulnerabilities"
+```
+
+```bash
+# インライン版（v2.1.205+）との使い分け
+# 短い制約: インライン版
+claude --append-subagent-system-prompt "Always respond in Japanese."
+
+# 長い制約（100行以上のポリシー等）: ファイルベース版
+claude --append-subagent-system-prompt-file /path/to/long-policy.txt
+```
+
+フォークサブエージェント（会話を継承するサブエージェント）は除外される。
 
 ### /doctor による設定ヘルスチェック（v2.1.205+, 機能拡張 v2.1.206+）
 
