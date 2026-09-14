@@ -1,14 +1,23 @@
 # 最新トレンドサマリー
 
-最終更新: 2026-09-07
+最終更新: 2026-09-14
 
 ---
 
 ## 最新バージョン
 
-**v2.1.261+**（前回: v2.1.248+、`--append-subagent-system-prompt-file` と停止状態サブエージェント再開が v2.1.261+ 必須と明記）
+**v2.1.267+**（前回: v2.1.261+）
 
-主要マイルストーン:
+新規判明マイルストーン（今週）:
+- v2.1.251+: モデル解決順序変更（`CLAUDE_CODE_SUBAGENT_MODEL` が第3優先に降格）
+- v2.1.257+: `scratchpad_dir` がフック共通入力に追加
+- v2.1.267+: `bypassPermissions` サブエージェントモード・`cloud_credential_error` StopFailure マッチャー
+
+その他補完:
+- v2.1.233+: `claude plugin validate <path>` コマンド
+- v2.1.242+: `/tasks` コマンドでモデル・エフォートレベル表示
+
+主要マイルストーン（累積）:
 - v2.1.178+: ネストディレクトリで同名エージェントはCWD最近傍が優先
 - v2.1.195+: マッチャーhyphen対応・カンマ区切りリスト
 - v2.1.196+: `prompt_id` フィールド（OpenTelemetry連携）
@@ -29,35 +38,41 @@
 - v2.1.219+: `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` 環境変数（バージョン確定）
 - v2.1.222+: `availableModels` allowlist のブロックファミリーエイリアス処理改善
 - v2.1.232+: `CLAUDE_CODE_FORK_SUBAGENT` インタラクティブモードでデフォルトON
+- v2.1.233+: `claude plugin validate <path>` コマンド追加
 - v2.1.234+: `CLAUDE_CODE_PROJECT_DIR_NAME` 環境変数（Auto Memory の複数リポジトリ間共有）
 - v2.1.238+: `.claude/agents/` のインライン MCP サーバー定義にフォルダトラスト要件を追加
 - v2.1.239+: `claudeMdExcludes` でシンボリックリンクのリンク元・リンク先両パスでマッチ可能に
+- v2.1.242+: `/tasks` コマンドでモデルとエフォートレベルを表示
 - v2.1.246+: `maxTurns` フロントマターフィールド / `maxTurns` 到達サブエージェントを「partial」としてマーク
 - v2.1.248+: `experimental: { cacheTtl: '5m' | '1h' }` サブエージェント実験フィールド / exit 0 での JSON パース失敗を non-blocking エラーとして報告
-- v2.1.257+: `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` 環境変数（全サブエージェントモデルの強制上書き）
-- v2.1.261+: `--append-subagent-system-prompt-file` フラグ（ファイルからサブエージェントシステムプロンプト追記）/ 停止状態からのサブエージェント再開
+- v2.1.251+: **モデル解決順序変更** – フロントマター `model` が `CLAUDE_CODE_SUBAGENT_MODEL` より優先される順序に変更
+- v2.1.257+: `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` 環境変数（全サブエージェントモデルの強制上書き）/ `scratchpad_dir` フック共通入力フィールド追加
+- v2.1.261+: `--append-subagent-system-prompt-file` フラグ / 停止状態からのサブエージェント再開
+- v2.1.267+: `bypassPermissions` サブエージェント permissionMode / `cloud_credential_error` StopFailure マッチャー
 
 ---
 
-## 今週のホットトピック（2026-09-07）
+## 今週のホットトピック（2026-09-14）
 
-1. **バージョン v2.1.261+ 確認**: 前回の v2.1.248+ から少なくとも13バージョン進行、v2.1.257+・v2.1.261+ の2マイルストーンが新規判明。
-2. **`CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1`（v2.1.257+）**: 全サブエージェントを `CLAUDE_CODE_SUBAGENT_MODEL` に強制する新環境変数。フロントマターの `model` フィールドよりも優先される。例外は `model: inherit` のフォークと `context: fork` のスキル。コスト管理・組織ポリシー適用に有効。
-3. **`--append-subagent-system-prompt-file` フラグ（v2.1.261+）**: テキストファイルから全サブエージェントのシステムプロンプトに追記する新フラグ。長大なポリシー文書をファイルで管理してサブエージェントに一括適用できる。`--append-subagent-system-prompt`（インライン版）の補完機能。
-4. **停止状態からのサブエージェント再開（v2.1.261+）**: `TaskStop` で停止したサブエージェントも `SendMessage` で再開可能に。完了・実行中に加えて停止状態も再開対象となった。
+1. **v2.1.267+ 確認**: 前回の v2.1.261+ から6バージョン進行。`bypassPermissions` サブエージェントモード（メイン会話も同モードの場合のみ有効）が追加。`cloud_credential_error` が StopFailure マッチャーに追加（v2.1.267+）。
+2. **v2.1.251+ モデル解決順序の破壊的変更**: `CLAUDE_CODE_SUBAGENT_MODEL` の優先度が第1位→第3位に降格。フロントマター `model` が環境変数より優先されるようになった。`CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1`（v2.1.257+）で旧来の挙動を取り戻せる。
+3. **`scratchpad_dir` フック入力フィールド（v2.1.257+）**: 全フックイベントの共通入力に `scratchpad_dir`（セッションスクラッチパッドのパス）が追加。フックスクリプトで一時ファイルの安全な保存先として利用可能。
+4. **`Notification` / `StopFailure` マッチャーの大幅拡充**: `Notification` に7種（`elicitation_url_dialog`, `elicitation_complete`, `elicitation_response`, `agent_needs_input`, `agent_completed`, `quota_auto_resume_stale`, `quota_auto_resume_disabled`）、`StopFailure` に7種（`oauth_org_not_allowed`, `account_on_hold`, `billing_error`, `invalid_request`, `model_not_found`, `server_error`, `max_output_tokens`）が新たに確認された。
 
 ---
 
-## 前週（2026-08-31）との主要差分
+## 前週（2026-09-07）との主要差分
 
 | カテゴリ | 変更内容 |
 |---------|---------|
-| バージョン | **v2.1.261+** 確認（前回は v2.1.248+）。2マイルストーン新規判明 |
-| サブエージェント | `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1`（v2.1.257+）・`--append-subagent-system-prompt-file`（v2.1.261+）・停止状態からの再開（v2.1.261+） |
-| フック | `permissionDecision: "skip"` の第3オプション初確認・`statusMessage` フィールド公式確認 |
-| 設定制御 | `disableAllHooks: false` のプロジェクト→ユーザー上書きが明確化 |
-| CLAUDE.md | `claudeMdExcludes` の symlink 両パスマッチ（v2.1.239+）が明記 |
-| タイムアウト | `PreModelSwitch`/`PostModelSwitch` の30秒・`SessionEnd` の1.5秒バジェット明確化 |
+| バージョン | **v2.1.267+** 確認（前回 v2.1.261+）。v2.1.251+・v2.1.257+・v2.1.267+ の3マイルストーン新規判明 |
+| サブエージェント | `bypassPermissions` permissionMode（v2.1.267+） |
+| モデル解決 | v2.1.251+ で `CLAUDE_CODE_SUBAGENT_MODEL` が第3優先に降格（重大な破壊的変更） |
+| フック入力 | `scratchpad_dir` フィールド追加（v2.1.257+） |
+| StopFailure | マッチャー7種追加（計10種）・`cloud_credential_error`（v2.1.267+） |
+| Notification | マッチャー7種追加（計9種以上に拡充） |
+| コマンド | `claude plugin validate <path>`（v2.1.233+） / `/tasks` モデル表示（v2.1.242+） |
+| Setup フック | `init`/`maintenance` マッチャー確認 |
 
 ---
 
@@ -65,8 +80,8 @@
 
 - サブエージェントのデフォルトネスト深さは3層（`CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` で変更可能）
 - 同時実行サブエージェント上限デフォルト 20（`CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS` で変更可能）
-- `/subtask` コマンドが公式確認（フォーク型サブエージェント起動）
-- バックグラウンドサブエージェントの利用可能ツールセット（19種）が明記
+- `/subtask` コマンドが公式確認（フォーク型サブエージェント起動、v2.1.212+）
+- バックグラウンドサブエージェントの利用可能ツールセット（19種＋Artifact）が明記
 - Claude 5 ファミリー（`claude-opus-5` / `claude-sonnet-5` / `claude-fable-5`）がサブエージェントで利用可能
 - `Ctrl+G` でプランモードの計画をテキストエディタで直接編集
 - `--no-session-persistence` フラグ: `-p` 実行はデフォルトでセッション保存
@@ -114,6 +129,13 @@
 - `allowedHttpHookUrls` / `httpHookAllowedEnvVars`（前回確認）
 - `maxTurns` フロントマターフィールド（v2.1.246+、前回確認）
 - `experimental.cacheTtl`（v2.1.248+、前回確認）
+- `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1`（v2.1.257+、前回確認）
+- `--append-subagent-system-prompt-file`（v2.1.261+、前回確認）
+- 停止状態からのサブエージェント再開（v2.1.261+、前回確認）
+- `permissionDecision: "skip"` 第3オプション（前回確認）
+- `statusMessage` フィールド（前回確認）
+- `disableAllHooks: false` プロジェクト→ユーザー上書き（前回確認）
+- `claudeMdExcludes` symlink 両パスマッチ（v2.1.239+、前回確認）
 
 ---
 

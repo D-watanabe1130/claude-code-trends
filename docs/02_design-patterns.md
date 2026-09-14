@@ -2,6 +2,20 @@
 
 最終更新: 2026-09-07
 
+## 直近の主要変更（2026-09-14）
+
+- **バージョン v2.1.267+ 確認**: v2.1.251+・v2.1.257+・v2.1.267+ の3マイルストーンが新規判明。
+- **`bypassPermissions` サブエージェントモード（v2.1.267+）**: サブエージェントの `permissionMode` に `bypassPermissions` が追加。ただしメインセッション自体が `bypassPermissions` で動作している場合のみ有効。組織ポリシーの意図しない回避を防ぐ設計。
+- **v2.1.251+ モデル解決順序の破壊的変更**: `CLAUDE_CODE_SUBAGENT_MODEL` の優先度が第1位→第3位に降格。新解決順序: 呼び出し時 `model` パラメータ（1位）→ フロントマター `model`（2位）→ `CLAUDE_CODE_SUBAGENT_MODEL`（3位）→ メイン会話モデル（4位）。旧来の挙動は `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1`（v2.1.257+）で取り戻せる。
+- **`scratchpad_dir` フック共通入力フィールド（v2.1.257+）**: 全フックイベントの共通入力に `scratchpad_dir`（セッションスクラッチパッドのパス）が追加。フックスクリプトから `jq -r '.scratchpad_dir'` で参照し、一時ファイルの安全な保存先として利用可能。
+- **`cloud_credential_error` StopFailure マッチャー（v2.1.267+）**: クラウド認証エラーを StopFailure フックで検出できるようになった。認証情報の自動リフレッシュに活用可能。
+- **`Notification` マッチャー大幅拡充**: 新規7種追加（`elicitation_url_dialog`・`elicitation_complete`・`elicitation_response`・`agent_needs_input`・`agent_completed`・`quota_auto_resume_stale`・`quota_auto_resume_disabled`）。合計9種以上に拡充。
+- **`StopFailure` マッチャー大幅拡充**: 新規7種追加（`oauth_org_not_allowed`・`account_on_hold`・`billing_error`・`invalid_request`・`model_not_found`・`server_error`・`max_output_tokens`）。合計10種に拡充（既存: `rate_limit`・`overloaded`・`authentication_failed`）。
+- **`Setup` フックマッチャー詳細確認**: `init`（`--init-only`/`--init` フラグ使用時）と `maintenance`（`--maintenance` 使用時）のマッチャーが確認された。
+- **`allowManagedHooksOnly` 詳細挙動確認**: user/project/local 設定のフック・force 無効プラグインフックをブロック。`statusLine`・`fileSuggestion`・`subagentStatusLine` をマネージド設定のみに制限。`disableCommandPluginSources: false` で例外設定可能。
+- **`claude plugin validate <path>` コマンド（v2.1.233+）**: プラグインのエージェントフロントマターを静的検証。CI/CDパイプラインでの事前チェックに活用可能。
+- **`/tasks` コマンドのモデル・エフォート表示（v2.1.242+）**: 実行中・完了済みサブエージェントの一覧にモデル名とエフォートレベルが追加された。
+
 ## 直近の主要変更（2026-09-07）
 
 - **バージョン v2.1.261+ 確認**: v2.1.257+・v2.1.261+ の2マイルストーン新規判明。

@@ -2,6 +2,12 @@
 
 ---
 
+## 2026-09-14
+
+公式ドキュメント4種（best-practices/sub-agents/hooks/memory）を取得。外部GitHubソースはMCPスコープ制限により今週も取得不可。最大の発見は **バージョン v2.1.267+ の確認** で、前回の v2.1.261+ から6バージョン進行し、v2.1.251+・v2.1.257+・v2.1.267+ の3マイルストーンが新規判明した。特に重要な **破壊的変更** は **v2.1.251+** で発生したモデル解決順序の変更で、`CLAUDE_CODE_SUBAGENT_MODEL` 環境変数の優先度が第1位から第3位に降格し、フロントマターの `model` フィールドが環境変数より優先されるようになった（旧来の挙動は `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` で取り戻せる）。v2.1.267+ では **`bypassPermissions` サブエージェントモード**が追加され、メインセッションが `bypassPermissions` で動作している場合のみサブエージェントでも同モードが使用可能になった。また **`cloud_credential_error`** が StopFailure マッチャーに追加されたため、クラウド認証エラーを自動検出して認証情報のリフレッシュスクリプトを起動できるようになった。v2.1.257+ では全フックイベントの共通入力に **`scratchpad_dir`** フィールドが追加され、フックスクリプトから安全な一時ファイル保存先を参照可能に。フックの拡充も大きく、`Notification` マッチャーが7種追加（`elicitation_url_dialog`・`elicitation_complete`・`elicitation_response`・`agent_needs_input`・`agent_completed`・`quota_auto_resume_stale`・`quota_auto_resume_disabled`）、`StopFailure` マッチャーも7種追加（`oauth_org_not_allowed`・`account_on_hold`・`billing_error`・`invalid_request`・`model_not_found`・`server_error`・`max_output_tokens`）されて計10種に拡充された。コマンド面では `claude plugin validate <path>`（v2.1.233+）で CI/CD でのプラグイン静的検証が可能になり、`/tasks` コマンドがモデルとエフォートレベルを表示するようになった（v2.1.242+）。Setup フックイベントの `init`/`maintenance` マッチャー詳細と `allowManagedHooksOnly` の挙動詳細も今週確認された。
+
+---
+
 ## 2026-09-07
 
 公式ドキュメント4種（best-practices/sub-agents/hooks/memory）を取得。外部GitHubソースはMCPスコープ制限により今週も取得不可。最大の発見は **バージョン v2.1.261+ の確認** で、前回の v2.1.248+ から少なくとも13バージョン進行し、v2.1.257+・v2.1.261+ の2マイルストーンが新規判明した。サブエージェント分野では3つの重要な新機能が確認された。**`CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1`（v2.1.257+）** は全サブエージェントを `CLAUDE_CODE_SUBAGENT_MODEL` に強制する環境変数で、フロントマターの `model` フィールドよりも優先される（例外: `model: inherit` のフォーク・`context: fork` のスキル）。**`--append-subagent-system-prompt-file` フラグ（v2.1.261+）** はファイルから全サブエージェントのシステムプロンプト末尾に追記する機能で、長大な組織ポリシー文書の管理に有効。**停止状態からのサブエージェント再開（v2.1.261+）** により、`TaskStop` で停止したサブエージェントも `SendMessage` で再開できるようになった。フック分野では `permissionDecision: "skip"` が第3の権限決定オプションとして初確認され、従来の "allow"/"deny" に加えて処理スキップが可能に。また `statusMessage` フィールドでフック実行中のスピナーメッセージをカスタマイズできることが公式確認された。設定面では `disableAllHooks: false` をプロジェクト設定に書くとユーザー設定の `true` を上書きできることが明確化され、`claudeMdExcludes` のシンボリックリンク対応（v2.1.239+）がリンク元・リンク先両パスで機能するようになったことも記録された。

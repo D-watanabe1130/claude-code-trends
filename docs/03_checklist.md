@@ -1,6 +1,6 @@
 # Claude Code 設計チェックリスト
 
-最終更新: 2026-08-24
+最終更新: 2026-09-14
 
 ---
 
@@ -465,6 +465,60 @@
 #### CLAUDE.md・設定
 
 - [ ] `claudeMdExcludes` でシンボリックリンクを除外する際、v2.1.239+ からリンク元・リンク先のどちらのパスでもマッチするようになったことを把握しているか（2026-09-07+）
+
+---
+
+## 新機能チェック（2026-09-14時点）
+
+### バージョン v2.1.251+〜v2.1.267+ 新機能
+
+#### サブエージェントモデル解決（v2.1.251+ 破壊的変更）
+
+- [ ] **v2.1.251+ の破壊的変更**: `CLAUDE_CODE_SUBAGENT_MODEL` の優先度が第1位から第3位に降格したことを把握しているか（フロントマター `model` が環境変数より優先されるようになった）（v2.1.251+）（2026-09-14+）
+- [ ] 新しいモデル解決順序（呼び出し時パラメータ→フロントマター→CLAUDE_CODE_SUBAGENT_MODEL→メインモデル）を理解しているか（2026-09-14+）
+- [ ] 旧来の「環境変数が全フロントマターを上書きする」挙動を取り戻すために `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` を使っているか（v2.1.257+）（2026-09-14+）
+
+#### `bypassPermissions` サブエージェントモード（v2.1.267+）
+
+- [ ] `permissionMode: bypassPermissions` がサブエージェントで使える条件（メインセッション自体も `bypassPermissions` である必要がある）を理解しているか（v2.1.267+）（2026-09-14+）
+- [ ] `bypassPermissions` モードをサブエージェントで設定する際のセキュリティ設計（メインの権限レベルに依存）を把握しているか（2026-09-14+）
+
+#### フック入力の `scratchpad_dir` フィールド（v2.1.257+）
+
+- [ ] 全フックイベントの共通入力に `scratchpad_dir` フィールドが追加されたことを把握しているか（v2.1.257+）（2026-09-14+）
+- [ ] フックスクリプト内で `jq -r '.scratchpad_dir'` で参照し、一時ファイルを `/tmp` ではなく `scratchpad_dir` に保存するようにしているか（2026-09-14+）
+
+#### StopFailure マッチャー拡充（計10種）
+
+- [ ] `StopFailure` マッチャーに7種が追加され、合計10種になったことを把握しているか（2026-09-14+）
+  - `rate_limit` / `overloaded` / `authentication_failed`（既存）
+  - `cloud_credential_error`（v2.1.267+）
+  - `oauth_org_not_allowed` / `account_on_hold` / `billing_error` / `invalid_request` / `model_not_found` / `server_error` / `max_output_tokens`（新規）
+- [ ] `cloud_credential_error` マッチャーでクラウド認証エラーを検出して自動リフレッシュスクリプトを起動しているか（v2.1.267+）（2026-09-14+）
+- [ ] `billing_error` / `account_on_hold` マッチャーで課金・アカウント停止を検出して管理者に通知しているか（2026-09-14+）
+- [ ] `model_not_found` マッチャーでモデル名ミスを検出してアラートを出しているか（2026-09-14+）
+
+#### Notification マッチャー拡充（計9種以上）
+
+- [ ] `Notification` マッチャーに7種が追加されたことを把握しているか（2026-09-14+）
+  - `agent_needs_input` でエージェントがユーザー入力待ち状態を検出しているか
+  - `agent_completed` でエージェント完了を検出して後続処理をトリガーしているか
+  - `quota_auto_resume_stale` / `quota_auto_resume_disabled` でクォータ関連の問題を監視しているか
+
+#### Setup フックの `init`/`maintenance` マッチャー
+
+- [ ] `Setup` フックで `init` マッチャーを使い `--init-only`/`--init` 実行時のみプロジェクト初期化処理を走らせているか（2026-09-14+）
+- [ ] `Setup` フックで `maintenance` マッチャーを使い `--maintenance` 実行時のみメンテナンス処理を走らせているか（2026-09-14+）
+
+#### コマンド・ツール
+
+- [ ] `claude plugin validate <path>` で CI/CD パイプラインにプラグイン静的検証を組み込んでいるか（v2.1.233+）（2026-09-14+）
+- [ ] `/tasks` コマンドでサブエージェントのモデル名とエフォートレベルを確認してコスト管理しているか（v2.1.242+）（2026-09-14+）
+
+#### 企業設定
+
+- [ ] `allowManagedHooksOnly: true` の詳細な制限範囲（user/project/local フック・force 無効プラグインフック・statusLine 等のカスタム設定が全て制限される）を理解しているか（2026-09-14+）
+- [ ] `allowManagedHooksOnly` 環境での例外設定 `disableCommandPluginSources: false` を把握しているか（2026-09-14+）
 
 ---
 
