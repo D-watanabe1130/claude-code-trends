@@ -2,6 +2,12 @@
 
 ---
 
+## 2026-09-21
+
+公式ドキュメント4種（best-practices/sub-agents/hooks/memory）を取得。外部GitHubソースはMCPスコープ制限により今週も取得不可。今週最大の発見は **v2.1.277+ の AGENTS.md ネイティブサポート** で、Claude Code が他のコーディングエージェント（GitHub Copilot・Cursor 等）と共通の `AGENTS.md` ファイルを従来必要だったワークアラウンド（`@AGENTS.md` インポート・symlink）なしで直接読み込めるようになった。`/config` パネルに「Project instructions」設定が追加され、`claude-md-or-agents-md`（デフォルト）/ `claude-md-and-agents-md`（両方読む）/ `claude-md`（CLAUDE.md のみ）/ `managed-only`（マネージドのみ）の4値から選択可能。設定ファイルからは `pluginConfigs.agents-md@builtin.options.instructionFiles` キーで制御できる。ただし AGENTS.md を直接読み込む場合は `/memory` や `/context` のリストに表示されず `InstructionsLoaded` フックも発火しないため、フックでの監視が必要なケースは引き続き `CLAUDE.md` からのインポートが推奨される。v2.1.271+ では **`omitClaudeMd: true` サブエージェントフロントマターフィールド**が追加され、特定のサブエージェントが user/project/local CLAUDE.md を全てスキップした状態で起動できるようになった（分離分析・コンテキスト節約に有効）。StopFailure マッチャーは **`unknown` が追加されて計11種に確定**し、他のタイプに分類されない全エラーをフォールバックでキャッチできるようになった。また、バックグラウンドサブエージェントのビルトインツール一覧に **`SubagentHandback`** が追加されて計20種となったことも確認された。
+
+---
+
 ## 2026-09-14
 
 公式ドキュメント4種（best-practices/sub-agents/hooks/memory）を取得。外部GitHubソースはMCPスコープ制限により今週も取得不可。最大の発見は **バージョン v2.1.267+ の確認** で、前回の v2.1.261+ から6バージョン進行し、v2.1.251+・v2.1.257+・v2.1.267+ の3マイルストーンが新規判明した。特に重要な **破壊的変更** は **v2.1.251+** で発生したモデル解決順序の変更で、`CLAUDE_CODE_SUBAGENT_MODEL` 環境変数の優先度が第1位から第3位に降格し、フロントマターの `model` フィールドが環境変数より優先されるようになった（旧来の挙動は `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` で取り戻せる）。v2.1.267+ では **`bypassPermissions` サブエージェントモード**が追加され、メインセッションが `bypassPermissions` で動作している場合のみサブエージェントでも同モードが使用可能になった。また **`cloud_credential_error`** が StopFailure マッチャーに追加されたため、クラウド認証エラーを自動検出して認証情報のリフレッシュスクリプトを起動できるようになった。v2.1.257+ では全フックイベントの共通入力に **`scratchpad_dir`** フィールドが追加され、フックスクリプトから安全な一時ファイル保存先を参照可能に。フックの拡充も大きく、`Notification` マッチャーが7種追加（`elicitation_url_dialog`・`elicitation_complete`・`elicitation_response`・`agent_needs_input`・`agent_completed`・`quota_auto_resume_stale`・`quota_auto_resume_disabled`）、`StopFailure` マッチャーも7種追加（`oauth_org_not_allowed`・`account_on_hold`・`billing_error`・`invalid_request`・`model_not_found`・`server_error`・`max_output_tokens`）されて計10種に拡充された。コマンド面では `claude plugin validate <path>`（v2.1.233+）で CI/CD でのプラグイン静的検証が可能になり、`/tasks` コマンドがモデルとエフォートレベルを表示するようになった（v2.1.242+）。Setup フックイベントの `init`/`maintenance` マッチャー詳細と `allowManagedHooksOnly` の挙動詳細も今週確認された。

@@ -1,6 +1,14 @@
 # Claude Code 設計パターン集
 
-最終更新: 2026-09-07
+最終更新: 2026-09-21
+
+## 直近の主要変更（2026-09-21）
+
+- **バージョン v2.1.277+ 確認**: v2.1.271+・v2.1.277+ の2マイルストーンが新規判明。
+- **AGENTS.md ネイティブサポート（v2.1.277+）**: 他のコーディングエージェントと共有する `AGENTS.md` を Claude Code がネイティブ直接読み込み可能になった。従来の `@AGENTS.md` インポートや symlink が不要に。`/config` に「Project instructions」設定が追加され `claude-md-or-agents-md`（デフォルト）/ `claude-md-and-agents-md` / `claude-md` / `managed-only` から選択。設定ファイルでは `pluginConfigs."agents-md@builtin".options.instructionFiles` で制御。AGENTS.md 直接読み込み時は InstructionsLoaded フックが発火しない点に注意。
+- **`omitClaudeMd` サブエージェントフィールド（v2.1.271+）**: フロントマターに `omitClaudeMd: true` を設定すると、そのサブエージェントが user/project/local CLAUDE.md を全スキップして起動。分離分析・コンテキスト節約・異なる規約セットでの実行に有効。
+- **StopFailure マッチャー全11種確定**: `unknown` が追加（10種→11種）。全てのエラータイプへのフォールバックキャッチが可能に。
+- **バックグラウンドサブエージェントのツール一覧**: `SubagentHandback` が追加され計20種に。
 
 ## 直近の主要変更（2026-09-14）
 

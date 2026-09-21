@@ -1,17 +1,16 @@
 # 最新トレンドサマリー
 
-最終更新: 2026-09-14
+最終更新: 2026-09-21
 
 ---
 
 ## 最新バージョン
 
-**v2.1.267+**（前回: v2.1.261+）
+**v2.1.277+**（前回: v2.1.267+）
 
 新規判明マイルストーン（今週）:
-- v2.1.251+: モデル解決順序変更（`CLAUDE_CODE_SUBAGENT_MODEL` が第3優先に降格）
-- v2.1.257+: `scratchpad_dir` がフック共通入力に追加
-- v2.1.267+: `bypassPermissions` サブエージェントモード・`cloud_credential_error` StopFailure マッチャー
+- v2.1.271+: `omitClaudeMd` サブエージェントフロントマターフィールド
+- v2.1.277+: **AGENTS.md ネイティブサポート**
 
 その他補完:
 - v2.1.233+: `claude plugin validate <path>` コマンド
@@ -49,30 +48,30 @@
 - v2.1.257+: `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` 環境変数（全サブエージェントモデルの強制上書き）/ `scratchpad_dir` フック共通入力フィールド追加
 - v2.1.261+: `--append-subagent-system-prompt-file` フラグ / 停止状態からのサブエージェント再開
 - v2.1.267+: `bypassPermissions` サブエージェント permissionMode / `cloud_credential_error` StopFailure マッチャー
+- v2.1.271+: `omitClaudeMd` サブエージェントフロントマターフィールド（user/project/local CLAUDE.md をスキップ）
+- v2.1.277+: **AGENTS.md ネイティブサポート**（`/config` に「Project instructions」設定追加）
 
 ---
 
-## 今週のホットトピック（2026-09-14）
+## 今週のホットトピック（2026-09-21）
 
-1. **v2.1.267+ 確認**: 前回の v2.1.261+ から6バージョン進行。`bypassPermissions` サブエージェントモード（メイン会話も同モードの場合のみ有効）が追加。`cloud_credential_error` が StopFailure マッチャーに追加（v2.1.267+）。
-2. **v2.1.251+ モデル解決順序の破壊的変更**: `CLAUDE_CODE_SUBAGENT_MODEL` の優先度が第1位→第3位に降格。フロントマター `model` が環境変数より優先されるようになった。`CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1`（v2.1.257+）で旧来の挙動を取り戻せる。
-3. **`scratchpad_dir` フック入力フィールド（v2.1.257+）**: 全フックイベントの共通入力に `scratchpad_dir`（セッションスクラッチパッドのパス）が追加。フックスクリプトで一時ファイルの安全な保存先として利用可能。
-4. **`Notification` / `StopFailure` マッチャーの大幅拡充**: `Notification` に7種（`elicitation_url_dialog`, `elicitation_complete`, `elicitation_response`, `agent_needs_input`, `agent_completed`, `quota_auto_resume_stale`, `quota_auto_resume_disabled`）、`StopFailure` に7種（`oauth_org_not_allowed`, `account_on_hold`, `billing_error`, `invalid_request`, `model_not_found`, `server_error`, `max_output_tokens`）が新たに確認された。
+1. **v2.1.277+: AGENTS.md ネイティブサポート**: 前回の v2.1.267+ から10バージョン進行。`AGENTS.md` を Claude Code がネイティブに直接読み込めるようになった。従来の `@AGENTS.md` インポートや symlink によるワークアラウンドが不要になった。`/config` パネルの「Project instructions」設定に4つの値（`claude-md-or-agents-md` / `claude-md-and-agents-md` / `claude-md` / `managed-only`）が追加された。`agents-md@builtin` プラグインが内部実装。
+2. **v2.1.271+: `omitClaudeMd` サブエージェントフィールド**: サブエージェントが user/project/local CLAUDE.md をスキップして起動できるようになった。コンテキスト節約・分離実行に活用可能。
+3. **StopFailure マッチャー全11種確定**: 前回「10種」と記録していたが、`unknown` が加わって11種に確定。他のエラータイプに分類されない全エラーをフォールバックでキャッチ可能。
+4. **バックグラウンドサブエージェントのツール一覧更新**: `SubagentHandback` が加わり計20種となった。
 
 ---
 
-## 前週（2026-09-07）との主要差分
+## 前週（2026-09-14）との主要差分
 
 | カテゴリ | 変更内容 |
 |---------|---------|
-| バージョン | **v2.1.267+** 確認（前回 v2.1.261+）。v2.1.251+・v2.1.257+・v2.1.267+ の3マイルストーン新規判明 |
-| サブエージェント | `bypassPermissions` permissionMode（v2.1.267+） |
-| モデル解決 | v2.1.251+ で `CLAUDE_CODE_SUBAGENT_MODEL` が第3優先に降格（重大な破壊的変更） |
-| フック入力 | `scratchpad_dir` フィールド追加（v2.1.257+） |
-| StopFailure | マッチャー7種追加（計10種）・`cloud_credential_error`（v2.1.267+） |
-| Notification | マッチャー7種追加（計9種以上に拡充） |
-| コマンド | `claude plugin validate <path>`（v2.1.233+） / `/tasks` モデル表示（v2.1.242+） |
-| Setup フック | `init`/`maintenance` マッチャー確認 |
+| バージョン | **v2.1.277+** 確認（前回 v2.1.267+）。v2.1.271+・v2.1.277+ の2マイルストーン新規判明 |
+| **AGENTS.md** | **v2.1.277+ でネイティブサポート開始**（最大の変更）。「Project instructions」設定追加 |
+| サブエージェント | `omitClaudeMd: true` フロントマターフィールド（v2.1.271+）追加 |
+| StopFailure | `unknown` マッチャーが確定し計11種に（前回10種） |
+| バックグラウンドサブエージェント | `SubagentHandback` ツール追加（計20種） |
+| Project instructions | `managed-only` 値でproject/local/user CLAUDE.md・AGENTS.md を全スキップ可能 |
 
 ---
 
@@ -81,7 +80,6 @@
 - サブエージェントのデフォルトネスト深さは3層（`CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` で変更可能）
 - 同時実行サブエージェント上限デフォルト 20（`CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS` で変更可能）
 - `/subtask` コマンドが公式確認（フォーク型サブエージェント起動、v2.1.212+）
-- バックグラウンドサブエージェントの利用可能ツールセット（19種＋Artifact）が明記
 - Claude 5 ファミリー（`claude-opus-5` / `claude-sonnet-5` / `claude-fable-5`）がサブエージェントで利用可能
 - `Ctrl+G` でプランモードの計画をテキストエディタで直接編集
 - `--no-session-persistence` フラグ: `-p` 実行はデフォルトでセッション保存
@@ -121,7 +119,6 @@
 - `autoMemoryDirectory` でAuto Memory 保存場所カスタマイズ
 - `CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD` 環境変数
 - スキル `disable-model-invocation: true` フィールド
-- `AGENTS.md` 互換パターン（`@AGENTS.md` インポートまたは symlink）
 - `claudeMdExcludes` でモノレポ CLAUDE.md を選択的除外
 - `PreModelSwitch`/`PostModelSwitch` フックイベント（前回確認）
 - `SessionStart` マッチャーに `fork` 追加（前回確認）
@@ -136,6 +133,13 @@
 - `statusMessage` フィールド（前回確認）
 - `disableAllHooks: false` プロジェクト→ユーザー上書き（前回確認）
 - `claudeMdExcludes` symlink 両パスマッチ（v2.1.239+、前回確認）
+- `bypassPermissions` サブエージェントモード（v2.1.267+、前回確認）
+- `cloud_credential_error` StopFailure マッチャー（v2.1.267+、前回確認）
+- `scratchpad_dir` フック共通入力フィールド（v2.1.257+、前回確認）
+- Notification マッチャー9種（前回確認）
+- StopFailure マッチャー（今回 `unknown` 追加で計11種確定）
+- カスタムサブエージェント description の合計トークン上限: 15,000 tokens
+- `CLAUDE_AGENT_SDK_DISABLE_BUILTIN_AGENTS=1`（非インタラクティブ/SDK でビルトインエージェント全無効化）
 
 ---
 
