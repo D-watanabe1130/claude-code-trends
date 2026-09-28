@@ -2,6 +2,12 @@
 
 ---
 
+## 2026-09-28
+
+公式ドキュメント4種（best-practices/sub-agents/hooks/memory）を取得。外部GitHubソースはMCPスコープ制限により今週も取得不可。今週最大の発見は **v2.1.283+ の Auto Mode 全プランデフォルト化** で、これまで Pro/Max/Team プランのみに適用されていた Auto Mode（分類器モデルによる自動審査）が全プラン・全インタラクティブセッション（ターミナル・VS Code）でデフォルト動作になった。個人プランや Bedrock/Vertex 環境のユーザーを含む全員に影響する大きな変更で、スコープ拡大・未知インフラ・ホスティル指示による操作が自動的にブロックされる。同バージョンでは **`/doctor prompt-audit` コマンド** も追加され、CLAUDE.md・AGENTS.md・スキル・サブエージェント定義ファイルを静的に監査して古い指示・矛盾する指示・存在しないファイルへの参照を検出する（提案のみで自動変更はしない）。前週判明した AGENTS.md ネイティブサポート（v2.1.277+）の補完情報として、v2.1.280 で `/memory`・`/context` が AGENTS.md をリスト表示するようになり、v2.1.281 では Amazon Bedrock 経由や telemetry 無効のセッションで AGENTS.md が読み込めなかったバグが修正された。また `--agents ./agents.json` による JSON ファイル参照対応（v2.1.281）、サブエージェントの `color`・`initialPrompt` フィールドの公式ドキュメント化、`CLAUDE_CODE_DISABLE_BACKGROUND_TASKS=1` の公式追記も今週確認された。
+
+---
+
 ## 2026-09-21
 
 公式ドキュメント4種（best-practices/sub-agents/hooks/memory）を取得。外部GitHubソースはMCPスコープ制限により今週も取得不可。今週最大の発見は **v2.1.277+ の AGENTS.md ネイティブサポート** で、Claude Code が他のコーディングエージェント（GitHub Copilot・Cursor 等）と共通の `AGENTS.md` ファイルを従来必要だったワークアラウンド（`@AGENTS.md` インポート・symlink）なしで直接読み込めるようになった。`/config` パネルに「Project instructions」設定が追加され、`claude-md-or-agents-md`（デフォルト）/ `claude-md-and-agents-md`（両方読む）/ `claude-md`（CLAUDE.md のみ）/ `managed-only`（マネージドのみ）の4値から選択可能。設定ファイルからは `pluginConfigs.agents-md@builtin.options.instructionFiles` キーで制御できる。ただし AGENTS.md を直接読み込む場合は `/memory` や `/context` のリストに表示されず `InstructionsLoaded` フックも発火しないため、フックでの監視が必要なケースは引き続き `CLAUDE.md` からのインポートが推奨される。v2.1.271+ では **`omitClaudeMd: true` サブエージェントフロントマターフィールド**が追加され、特定のサブエージェントが user/project/local CLAUDE.md を全てスキップした状態で起動できるようになった（分離分析・コンテキスト節約に有効）。StopFailure マッチャーは **`unknown` が追加されて計11種に確定**し、他のタイプに分類されない全エラーをフォールバックでキャッチできるようになった。また、バックグラウンドサブエージェントのビルトインツール一覧に **`SubagentHandback`** が追加されて計20種となったことも確認された。

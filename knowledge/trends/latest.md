@@ -1,18 +1,21 @@
 # 最新トレンドサマリー
 
-最終更新: 2026-09-21
+最終更新: 2026-09-28
 
 ---
 
 ## 最新バージョン
 
-**v2.1.277+**（前回: v2.1.267+）
+**v2.1.283+**（前回: v2.1.277+）
 
 新規判明マイルストーン（今週）:
-- v2.1.271+: `omitClaudeMd` サブエージェントフロントマターフィールド
-- v2.1.277+: **AGENTS.md ネイティブサポート**
+- v2.1.280+: `/memory`・`/context` が AGENTS.md をリスト表示するように変更
+- v2.1.281+: `--agents ./agents.json` JSONファイル参照 / Bedrock・telemetry無効環境での AGENTS.md 読み込みバグ修正
+- v2.1.283+: **Auto Mode が全プラン・全インタラクティブセッションでデフォルト化** / `/doctor prompt-audit` コマンド追加
 
 その他補完:
+- v2.1.271+: `omitClaudeMd` サブエージェントフロントマターフィールド
+- v2.1.277+: **AGENTS.md ネイティブサポート**
 - v2.1.233+: `claude plugin validate <path>` コマンド
 - v2.1.242+: `/tasks` コマンドでモデル・エフォートレベル表示
 
@@ -50,28 +53,35 @@
 - v2.1.267+: `bypassPermissions` サブエージェント permissionMode / `cloud_credential_error` StopFailure マッチャー
 - v2.1.271+: `omitClaudeMd` サブエージェントフロントマターフィールド（user/project/local CLAUDE.md をスキップ）
 - v2.1.277+: **AGENTS.md ネイティブサポート**（`/config` に「Project instructions」設定追加）
+- v2.1.280+: `/memory`・`/context` が直接読み込んだ AGENTS.md をリスト表示
+- v2.1.281+: `--agents ./agents.json` JSON ファイル参照 / Bedrock・telemetry 無効環境での AGENTS.md 読み込みバグ修正
+- v2.1.283+: **Auto Mode が全プラン・全インタラクティブセッションでデフォルト化** / `/doctor prompt-audit` コマンド追加
 
 ---
 
-## 今週のホットトピック（2026-09-21）
+## 今週のホットトピック（2026-09-28）
 
-1. **v2.1.277+: AGENTS.md ネイティブサポート**: 前回の v2.1.267+ から10バージョン進行。`AGENTS.md` を Claude Code がネイティブに直接読み込めるようになった。従来の `@AGENTS.md` インポートや symlink によるワークアラウンドが不要になった。`/config` パネルの「Project instructions」設定に4つの値（`claude-md-or-agents-md` / `claude-md-and-agents-md` / `claude-md` / `managed-only`）が追加された。`agents-md@builtin` プラグインが内部実装。
-2. **v2.1.271+: `omitClaudeMd` サブエージェントフィールド**: サブエージェントが user/project/local CLAUDE.md をスキップして起動できるようになった。コンテキスト節約・分離実行に活用可能。
-3. **StopFailure マッチャー全11種確定**: 前回「10種」と記録していたが、`unknown` が加わって11種に確定。他のエラータイプに分類されない全エラーをフォールバックでキャッチ可能。
-4. **バックグラウンドサブエージェントのツール一覧更新**: `SubagentHandback` が加わり計20種となった。
+1. **v2.1.283: Auto Mode が全プランでデフォルト化**: 最大の変更。これまで Auto Mode は Pro/Max/Team プランのみのデフォルトだったが、v2.1.283 から **全プラン・全インタラクティブセッション**（ターミナル・VS Code）でデフォルト動作になった。分類器モデルがスコープ拡大・未知インフラ・ホスティル指示による操作を自動審査。個人プランや Bedrock/Vertex 環境のユーザー全員に影響。
+
+2. **v2.1.283: `/doctor prompt-audit` コマンド**: CLAUDE.md・AGENTS.md・ルール・スキル・サブエージェント定義ファイルを静的に監査して、古い指示・存在しないファイルへの参照・矛盾する指示を検出。提案のみで自動変更はしない。`/doctor prompt-audit .claude/skills/deploy` でパス指定も可能。bundled `/claude-api` スキル経由で動作。
+
+3. **v2.1.281: AGENTS.md の Bedrock/telemetry 無効バグ修正**: v2.1.277 から追加された AGENTS.md ネイティブサポートが Amazon Bedrock 経由や telemetry 無効のセッションで機能しない不具合が修正。v2.1.281 以降はこれらの環境でも動作。
+
+4. **v2.1.280: `/memory`・`/context` で AGENTS.md 確認可能に**: v2.1.280 以前は AGENTS.md が読み込まれているか確認する方法がなかったが、これ以降は `/memory` や `/context` のリストに表示されるようになった。
 
 ---
 
-## 前週（2026-09-14）との主要差分
+## 前週（2026-09-21）との主要差分
 
 | カテゴリ | 変更内容 |
 |---------|---------|
-| バージョン | **v2.1.277+** 確認（前回 v2.1.267+）。v2.1.271+・v2.1.277+ の2マイルストーン新規判明 |
-| **AGENTS.md** | **v2.1.277+ でネイティブサポート開始**（最大の変更）。「Project instructions」設定追加 |
-| サブエージェント | `omitClaudeMd: true` フロントマターフィールド（v2.1.271+）追加 |
-| StopFailure | `unknown` マッチャーが確定し計11種に（前回10種） |
-| バックグラウンドサブエージェント | `SubagentHandback` ツール追加（計20種） |
-| Project instructions | `managed-only` 値でproject/local/user CLAUDE.md・AGENTS.md を全スキップ可能 |
+| バージョン | **v2.1.283+** 確認（前回 v2.1.277+）。3マイルストーン（v2.1.280+・v2.1.281+・v2.1.283+）新規判明 |
+| **Auto Mode** | **v2.1.283+ で全プラン・全インタラクティブセッションのデフォルトに変更**（最大の変更） |
+| **`/doctor prompt-audit`** | **v2.1.283+ で追加**。CLAUDE.md 等の静的監査コマンド |
+| AGENTS.md | v2.1.280: `/memory`・`/context` でリスト表示。v2.1.281: Bedrock/telemetry 無効バグ修正 |
+| `--agents` | v2.1.281+: `-p` モードで `./agents.json` JSONファイル参照対応 |
+| サブエージェント | `color`・`initialPrompt` フィールドが公式ドキュメントで明示化 |
+| 環境変数 | `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS=1` が公式ドキュメントに追記 |
 
 ---
 
@@ -137,9 +147,12 @@
 - `cloud_credential_error` StopFailure マッチャー（v2.1.267+、前回確認）
 - `scratchpad_dir` フック共通入力フィールド（v2.1.257+、前回確認）
 - Notification マッチャー9種（前回確認）
-- StopFailure マッチャー（今回 `unknown` 追加で計11種確定）
+- StopFailure マッチャー11種（`unknown` 含む、前回確認）
 - カスタムサブエージェント description の合計トークン上限: 15,000 tokens
 - `CLAUDE_AGENT_SDK_DISABLE_BUILTIN_AGENTS=1`（非インタラクティブ/SDK でビルトインエージェント全無効化）
+- AGENTS.md ネイティブサポート（v2.1.277+）: `claude-md-or-agents-md`（デフォルト）/ `claude-md-and-agents-md` / `claude-md` / `managed-only` の4設定値
+- `omitClaudeMd: true` サブエージェントフィールド（v2.1.271+）
+- バックグラウンドサブエージェントのビルトインツール計20種（`SubagentHandback` 含む）
 
 ---
 

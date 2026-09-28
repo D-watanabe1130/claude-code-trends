@@ -2061,3 +2061,52 @@ Background agents → Agent teams（セッション間の協調が必要にな�
 | "全テストが通過" のような自然言語条件 | ✅ 向いている | ❌ スクリプトでの評価が難しい |
 | "exit code 0" のような確定的条件 | △ 可能だが重い | ✅ 向いている |
 | 未監視の長時間実行 | ✅ 向いている | ✅ 向いている（最大8回） |
+
+---
+
+## `/doctor prompt-audit` ワークフローパターン（2026-09-28 確認、v2.1.283+）
+
+CLAUDE.md・AGENTS.md・スキル・サブエージェント定義の静的監査コマンド。提案のみで自動変更なし。
+
+```bash
+# 全ファイル監査
+/doctor prompt-audit
+
+# 特定パス配下のみ監査
+/doctor prompt-audit .claude/skills/deploy
+/doctor prompt-audit .claude/agents/
+```
+
+**検出内容:**
+- 古いモデル向けに書かれた指示
+- 存在しないファイル・コマンドへの参照
+- ファイル間の矛盾・競合する指示
+
+**依存:** bundled `/claude-api` スキル経由で動作。`skillOverrides` や `disableBundledSkills` でこのスキルを無効にすると使用不可。
+
+**推奨タイミング:**
+- CLAUDE.md を大幅に更新した後
+- バージョンアップ後（古い指示が残っていないか確認）
+- 定期的な CLAUDE.md メンテナンス時
+
+---
+
+## Auto Mode 全プランデフォルト化（2026-09-28 確認、v2.1.283+）
+
+v2.1.283+ から Auto Mode が全プラン・全インタラクティブセッションでデフォルトになった。
+
+```
+# バージョン別 Auto Mode デフォルト状態
+v2.1.283+  : 全プラン・全インタラクティブセッション（ターミナル・VS Code）でデフォルト
+v2.1.158+〜v2.1.282: Pro/Max/Team プランのみデフォルト; 他は手動で有効化（Bedrock/Vertex は CLAUDE_CODE_ENABLE_AUTO_MODE=1）
+```
+
+**影響:**
+- 個人プランユーザー: v2.1.283+ から Auto Mode がデフォルトになる（分類器モデルが危険なアクションを自動審査）
+- Bedrock/Vertex ユーザー: `CLAUDE_CODE_ENABLE_AUTO_MODE=1` 不要で自動有効化
+- Manual Mode を希望するユーザーは `Shift+Tab` でトグル、または `"defaultPermissionMode": "manual"` を設定
+
+**Auto Mode が審査するリスクカテゴリ:**
+- スコープ拡大（意図しないディレクトリへの書き込み等）
+- 未知インフラへのアクセス
+- ホスティル指示（プロンプトインジェクション）による操作
