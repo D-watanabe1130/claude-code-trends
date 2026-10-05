@@ -2,6 +2,12 @@
 
 ---
 
+## 2026-10-05
+
+公式ドキュメント4種（best-practices/sub-agents/hooks/memory）を取得。外部GitHubソースはMCPスコープ制限により今週も取得不可。今週最大の発見は **v2.1.286+ の確認** で、サブエージェントドキュメントに明記された **`Ctrl+Enter`/`Ctrl+X Ctrl+S` キーボードショートカット** により、タスクリストで閲覧中のバックグラウンドエージェントにメインセッションを切り替えることなく直接メッセージを送れるようになった。変更点としての重要度は比較的小さいが、並列エージェントを多用するユーザーにとって UX 改善に直結する。補完情報として、フックドキュメントに記載されていた **v2.1.251+ の SessionStart 再開時フィールド追加**（`seconds_since_last_response`・`context_tokens`・`prompt_cache_likely_expired`・`estimated_cache_write_usd`）が前回報告で見落とされていたことを確認・記録した。これらのフィールドはセッション再開時のコスト推定やプロンプトキャッシュの有効性確認に使えるため、長期セッション管理のフックを設計するユーザーには有用な情報である。今週は先週確認した大きな変更（Auto Mode 全プランデフォルト化・`/doctor prompt-audit`・AGENTS.md バグ修正）からの新規変更が比較的少ない週となった。
+
+---
+
 ## 2026-09-28
 
 公式ドキュメント4種（best-practices/sub-agents/hooks/memory）を取得。外部GitHubソースはMCPスコープ制限により今週も取得不可。今週最大の発見は **v2.1.283+ の Auto Mode 全プランデフォルト化** で、これまで Pro/Max/Team プランのみに適用されていた Auto Mode（分類器モデルによる自動審査）が全プラン・全インタラクティブセッション（ターミナル・VS Code）でデフォルト動作になった。個人プランや Bedrock/Vertex 環境のユーザーを含む全員に影響する大きな変更で、スコープ拡大・未知インフラ・ホスティル指示による操作が自動的にブロックされる。同バージョンでは **`/doctor prompt-audit` コマンド** も追加され、CLAUDE.md・AGENTS.md・スキル・サブエージェント定義ファイルを静的に監査して古い指示・矛盾する指示・存在しないファイルへの参照を検出する（提案のみで自動変更はしない）。前週判明した AGENTS.md ネイティブサポート（v2.1.277+）の補完情報として、v2.1.280 で `/memory`・`/context` が AGENTS.md をリスト表示するようになり、v2.1.281 では Amazon Bedrock 経由や telemetry 無効のセッションで AGENTS.md が読み込めなかったバグが修正された。また `--agents ./agents.json` による JSON ファイル参照対応（v2.1.281）、サブエージェントの `color`・`initialPrompt` フィールドの公式ドキュメント化、`CLAUDE_CODE_DISABLE_BACKGROUND_TASKS=1` の公式追記も今週確認された。

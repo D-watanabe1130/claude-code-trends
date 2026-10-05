@@ -1,25 +1,20 @@
 # 最新トレンドサマリー
 
-最終更新: 2026-09-28
+最終更新: 2026-10-05
 
 ---
 
 ## 最新バージョン
 
-**v2.1.283+**（前回: v2.1.277+）
+**v2.1.286+**（前回: v2.1.283+）
 
 新規判明マイルストーン（今週）:
-- v2.1.280+: `/memory`・`/context` が AGENTS.md をリスト表示するように変更
-- v2.1.281+: `--agents ./agents.json` JSONファイル参照 / Bedrock・telemetry無効環境での AGENTS.md 読み込みバグ修正
-- v2.1.283+: **Auto Mode が全プラン・全インタラクティブセッションでデフォルト化** / `/doctor prompt-audit` コマンド追加
+- v2.1.286+: **`Ctrl+Enter`/`Ctrl+X Ctrl+S`** で閲覧中のバックグラウンドエージェントにメッセージを送信可能に
 
-その他補完:
-- v2.1.271+: `omitClaudeMd` サブエージェントフロントマターフィールド
-- v2.1.277+: **AGENTS.md ネイティブサポート**
-- v2.1.233+: `claude plugin validate <path>` コマンド
-- v2.1.242+: `/tasks` コマンドでモデル・エフォートレベル表示
+補完情報（今週再確認）:
+- v2.1.251+: 再開時 `SessionStart` フックに `seconds_since_last_response`・`context_tokens`・`prompt_cache_likely_expired`・`estimated_cache_write_usd` フィールドが追加（前回見落とし）
 
-主要マイルストーン（累積）:
+主要マイルストーン（前週まで累積）:
 - v2.1.178+: ネストディレクトリで同名エージェントはCWD最近傍が優先
 - v2.1.195+: マッチャーhyphen対応・カンマ区切りリスト
 - v2.1.196+: `prompt_id` フィールド（OpenTelemetry連携）
@@ -47,7 +42,7 @@
 - v2.1.242+: `/tasks` コマンドでモデルとエフォートレベルを表示
 - v2.1.246+: `maxTurns` フロントマターフィールド / `maxTurns` 到達サブエージェントを「partial」としてマーク
 - v2.1.248+: `experimental: { cacheTtl: '5m' | '1h' }` サブエージェント実験フィールド / exit 0 での JSON パース失敗を non-blocking エラーとして報告
-- v2.1.251+: **モデル解決順序変更** – フロントマター `model` が `CLAUDE_CODE_SUBAGENT_MODEL` より優先される順序に変更
+- v2.1.251+: **モデル解決順序変更** – フロントマター `model` が `CLAUDE_CODE_SUBAGENT_MODEL` より優先 / **SessionStart 再開時フィールド追加**: `seconds_since_last_response`・`context_tokens`・`prompt_cache_likely_expired`・`estimated_cache_write_usd`
 - v2.1.257+: `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` 環境変数（全サブエージェントモデルの強制上書き）/ `scratchpad_dir` フック共通入力フィールド追加
 - v2.1.261+: `--append-subagent-system-prompt-file` フラグ / 停止状態からのサブエージェント再開
 - v2.1.267+: `bypassPermissions` サブエージェント permissionMode / `cloud_credential_error` StopFailure マッチャー
@@ -56,32 +51,25 @@
 - v2.1.280+: `/memory`・`/context` が直接読み込んだ AGENTS.md をリスト表示
 - v2.1.281+: `--agents ./agents.json` JSON ファイル参照 / Bedrock・telemetry 無効環境での AGENTS.md 読み込みバグ修正
 - v2.1.283+: **Auto Mode が全プラン・全インタラクティブセッションでデフォルト化** / `/doctor prompt-audit` コマンド追加
+- v2.1.286+: **`Ctrl+Enter`/`Ctrl+X Ctrl+S`** で閲覧中のバックグラウンドエージェントにメッセージを送信
 
 ---
 
-## 今週のホットトピック（2026-09-28）
+## 今週のホットトピック（2026-10-05）
 
-1. **v2.1.283: Auto Mode が全プランでデフォルト化**: 最大の変更。これまで Auto Mode は Pro/Max/Team プランのみのデフォルトだったが、v2.1.283 から **全プラン・全インタラクティブセッション**（ターミナル・VS Code）でデフォルト動作になった。分類器モデルがスコープ拡大・未知インフラ・ホスティル指示による操作を自動審査。個人プランや Bedrock/Vertex 環境のユーザー全員に影響。
+1. **v2.1.286+: バックグラウンドエージェントへのキーボードショートカット**: タスクリストで閲覧中のエージェントに `Ctrl+Enter` または `Ctrl+X Ctrl+S` でメッセージを送れるように。メインセッションから離れずに並列エージェントを誘導できるUX向上。
 
-2. **v2.1.283: `/doctor prompt-audit` コマンド**: CLAUDE.md・AGENTS.md・ルール・スキル・サブエージェント定義ファイルを静的に監査して、古い指示・存在しないファイルへの参照・矛盾する指示を検出。提案のみで自動変更はしない。`/doctor prompt-audit .claude/skills/deploy` でパス指定も可能。bundled `/claude-api` スキル経由で動作。
-
-3. **v2.1.281: AGENTS.md の Bedrock/telemetry 無効バグ修正**: v2.1.277 から追加された AGENTS.md ネイティブサポートが Amazon Bedrock 経由や telemetry 無効のセッションで機能しない不具合が修正。v2.1.281 以降はこれらの環境でも動作。
-
-4. **v2.1.280: `/memory`・`/context` で AGENTS.md 確認可能に**: v2.1.280 以前は AGENTS.md が読み込まれているか確認する方法がなかったが、これ以降は `/memory` や `/context` のリストに表示されるようになった。
+2. **v2.1.251+ SessionStart 再開フィールド（補完）**: resume 時の SessionStart フックに `context_tokens`・`prompt_cache_likely_expired`・`estimated_cache_write_usd`・`seconds_since_last_response` が追加されていたことを今週の調査で補足確認。コスト監視・再開戦略の自動化に活用できる。
 
 ---
 
-## 前週（2026-09-21）との主要差分
+## 前週（2026-09-28）との主要差分
 
 | カテゴリ | 変更内容 |
 |---------|---------|
-| バージョン | **v2.1.283+** 確認（前回 v2.1.277+）。3マイルストーン（v2.1.280+・v2.1.281+・v2.1.283+）新規判明 |
-| **Auto Mode** | **v2.1.283+ で全プラン・全インタラクティブセッションのデフォルトに変更**（最大の変更） |
-| **`/doctor prompt-audit`** | **v2.1.283+ で追加**。CLAUDE.md 等の静的監査コマンド |
-| AGENTS.md | v2.1.280: `/memory`・`/context` でリスト表示。v2.1.281: Bedrock/telemetry 無効バグ修正 |
-| `--agents` | v2.1.281+: `-p` モードで `./agents.json` JSONファイル参照対応 |
-| サブエージェント | `color`・`initialPrompt` フィールドが公式ドキュメントで明示化 |
-| 環境変数 | `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS=1` が公式ドキュメントに追記 |
+| バージョン | **v2.1.286+** 確認（前回 v2.1.283+）。1マイルストーン新規判明 |
+| **キーボードショートカット** | **v2.1.286+**: `Ctrl+Enter`/`Ctrl+X Ctrl+S` で閲覧中エージェントへメッセージ送信 |
+| **SessionStart フック補完** | **v2.1.251+（補完）**: 再開時フックに4フィールド追加（`seconds_since_last_response`・`context_tokens`・`prompt_cache_likely_expired`・`estimated_cache_write_usd`） |
 
 ---
 
@@ -153,6 +141,11 @@
 - AGENTS.md ネイティブサポート（v2.1.277+）: `claude-md-or-agents-md`（デフォルト）/ `claude-md-and-agents-md` / `claude-md` / `managed-only` の4設定値
 - `omitClaudeMd: true` サブエージェントフィールド（v2.1.271+）
 - バックグラウンドサブエージェントのビルトインツール計20種（`SubagentHandback` 含む）
+- Auto Mode が全プラン・全インタラクティブセッションのデフォルト化（v2.1.283+）
+- `/doctor prompt-audit` コマンド（v2.1.283+）
+- `--agents ./agents.json` JSON ファイル参照対応（v2.1.281+）
+- サブエージェントの `color`・`initialPrompt` フィールド（v2.1.283+ 公式ドキュメント化）
+- `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS=1`（公式ドキュメント化）
 
 ---
 
