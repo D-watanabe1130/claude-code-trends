@@ -1,18 +1,16 @@
 # 最新トレンドサマリー
 
-最終更新: 2026-10-05
+最終更新: 2026-10-12
 
 ---
 
 ## 最新バージョン
 
-**v2.1.286+**（前回: v2.1.283+）
+**v2.1.296+**（前回: v2.1.286+）
 
 新規判明マイルストーン（今週）:
-- v2.1.286+: **`Ctrl+Enter`/`Ctrl+X Ctrl+S`** で閲覧中のバックグラウンドエージェントにメッセージを送信可能に
-
-補完情報（今週再確認）:
-- v2.1.251+: 再開時 `SessionStart` フックに `seconds_since_last_response`・`context_tokens`・`prompt_cache_likely_expired`・`estimated_cache_write_usd` フィールドが追加（前回見落とし）
+- v2.1.295+: フックハンドラーの **`onFailure: "block"`** フィールド追加
+- v2.1.296+: **`CLAUDE_ENV_FILE`** が PowerShell でも利用可能に
 
 主要マイルストーン（前週まで累積）:
 - v2.1.178+: ネストディレクトリで同名エージェントはCWD最近傍が優先
@@ -55,25 +53,47 @@
 
 ---
 
-## 今週のホットトピック（2026-10-05）
+## 今週のホットトピック（2026-10-12）
 
-1. **v2.1.286+: バックグラウンドエージェントへのキーボードショートカット**: タスクリストで閲覧中のエージェントに `Ctrl+Enter` または `Ctrl+X Ctrl+S` でメッセージを送れるように。メインセッションから離れずに並列エージェントを誘導できるUX向上。
+1. **v2.1.295+ `onFailure: "block"` でポリシーフックの安全化**: フックスクリプトがエラー終了した場合にアクションをブロックできるフィールドが追加。セキュリティ系フックの設定ミスによる素通り問題を解決。
 
-2. **v2.1.251+ SessionStart 再開フィールド（補完）**: resume 時の SessionStart フックに `context_tokens`・`prompt_cache_likely_expired`・`estimated_cache_write_usd`・`seconds_since_last_response` が追加されていたことを今週の調査で補足確認。コスト監視・再開戦略の自動化に活用できる。
+2. **3 種の新フックタイプ公式化（`mcp_tool` / `prompt` / `agent`）**: Shell スクリプト以外に MCP ツール・AI 評価・サブエージェントをフックハンドラーとして利用可能に。
+
+3. **コンテキスト管理コマンドの精緻化**: `/btw`（コンテキスト非汚染確認）、部分要約 2 オプション（Summarize from/up to here）、`/compact <instructions>` が公式ベストプラクティスに明記。
 
 ---
 
-## 前週（2026-09-28）との主要差分
+## 前週（2026-10-05）との主要差分
 
 | カテゴリ | 変更内容 |
 |---------|---------|
-| バージョン | **v2.1.286+** 確認（前回 v2.1.283+）。1マイルストーン新規判明 |
-| **キーボードショートカット** | **v2.1.286+**: `Ctrl+Enter`/`Ctrl+X Ctrl+S` で閲覧中エージェントへメッセージ送信 |
-| **SessionStart フック補完** | **v2.1.251+（補完）**: 再開時フックに4フィールド追加（`seconds_since_last_response`・`context_tokens`・`prompt_cache_likely_expired`・`estimated_cache_write_usd`） |
+| バージョン | **v2.1.296+** 確認（前回 v2.1.286+）。2マイルストーン新規判明 |
+| **フックハンドラー** | **v2.1.295+**: `onFailure: "block"` フィールド追加 |
+| **フックタイプ** | `mcp_tool` / `prompt` / `agent` の3種が公式ドキュメントに明記 |
+| **環境変数** | **v2.1.296+**: `CLAUDE_ENV_FILE` が PowerShell でも動作 |
+| **コマンド** | `/goal`・`/btw`・`/compact <instructions>` がベストプラクティスに明記 |
+| **CLAUDE.md** | HTML コメント（`<!-- -->`）がコンテキスト注入前に除去されることが明記 |
+| **`/init`** | `CLAUDE_CODE_NEW_INIT=1` でインタラクティブ多段階フローが有効化 |
 
 ---
 
 ## 前々週以前からの既知事項（変更なし）
+
+- `onFailure: "block"` フックハンドラーフィールド（v2.1.295+）
+- `CLAUDE_ENV_FILE` の PowerShell 対応（v2.1.296+）
+- フックタイプ `mcp_tool` / `prompt` / `agent`（公式ドキュメント化）
+- `/goal` コマンド（ゴール条件の自動評価ループ）
+- `/btw` コマンド（コンテキスト非汚染サイドクエスチョン）
+- `/compact <instructions>` でカスタム圧縮指示
+- リワインドメニュー「Summarize from here」/「Summarize up to here」の2オプション
+- `CLAUDE_CODE_NEW_INIT=1` でインタラクティブ多段階 `/init`
+- フックコマンドの `args` フィールド（exec 形式、シェルバイパス）
+- CLAUDE.md の HTML ブロックコメント（`<!-- -->`）がコンテキスト注入前に除去
+- `Ctrl+Enter`/`Ctrl+X Ctrl+S` で閲覧中バックグラウンドエージェントにメッセージ送信（v2.1.286+）
+
+---
+
+---
 
 - サブエージェントのデフォルトネスト深さは3層（`CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` で変更可能）
 - 同時実行サブエージェント上限デフォルト 20（`CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS` で変更可能）
