@@ -2,6 +2,12 @@
 
 ---
 
+## 2026-10-19
+
+公式ドキュメント4種（best-practices/sub-agents/hooks/memory）を取得。外部GitHubソースはMCPスコープ制限により今週も取得不可。今週最大の発見は **`autoCompactWindow` サブエージェントフロントマターフィールド（v2.1.296）** で、サブエージェントごとに自動圧縮（autocompact）が発火するトークン数の閾値を 100,000〜1,000,000 の範囲で個別指定できるようになった。整数値での記述が必須（"200k" のような省略形は誤読される）。環境変数 `CLAUDE_CODE_AUTO_COMPACT_WINDOW` でも一括設定可能。同様に **`effort` per-invocation パラメーター（v2.1.292）** が新確認され、Agent ツール呼び出し時にその場でエフォートレベルを指定することで同一サブエージェント定義を複数エフォートで再利用できるようになった。AGENTS.md プラグインの内部 ID が `agents-md@builtin` から **`cc-plugin-agents-md@builtin`**（v2.1.285）に変更されており、settings.json でプラグイン設定を記述している場合は新 ID への移行が推奨される（後方互換あり）。フック面では `PreToolUse` の `permissionDecision` 選択肢として `defer` が確認され（allow/deny/ask/defer の4択）、フックイベントの総数が **33種** とドキュメントで明示された。また前回報告の **`bypassPermissions` の条件を訂正**：正しくはメインセッションが `default`/`dontAsk`/`plan` モードの場合にサブエージェントで `bypassPermissions` が設定可能（前回の「bypassPermissions モード時のみ有効」は誤り）。
+
+---
+
 ## 2026-10-12
 
 公式ドキュメント4種（best-practices/sub-agents/hooks/memory）を取得。外部GitHubソースはMCPスコープ制限により今週も取得不可。今週最大の発見は **v2.1.295+ の `onFailure: "block"` フィールド** で、フックハンドラーがエラー終了した際にアクションをブロックできるようになり、ポリシーフックの設定ミスによる素通り問題が解消された。また公式ドキュメントに **3 種の新フックタイプ（`mcp_tool` / `prompt` / `agent`）** が明記され、MCP ツール・AI 評価・サブエージェントをフックハンドラーとして利用できる幅広い拡張が確認された。v2.1.296+ では `CLAUDE_ENV_FILE` が PowerShell でも動作するようになり Windows 環境でのセッション変数永続化が可能になった。ベストプラクティスドキュメントにはコンテキスト管理を精緻化する複数の更新があり、コンテキストを汚染しないサイドクエスチョンを行う **`/btw` コマンド**、カスタム圧縮指示付きの **`/compact <instructions>`**、リワインドメニューの部分要約 2 オプション（Summarize from/up to here）、ゴール条件を自動評価ループで監視する **`/goal` コマンド** が明記された。さらに CLAUDE.md の HTML ブロックコメントがコンテキスト注入前に自動除去されること、`CLAUDE_CODE_NEW_INIT=1` 環境変数でインタラクティブな多段階 `/init` が有効化されること、フックコマンドの `args` フィールドでシェルバイパスの exec 形式実行が可能なことも今週新たに確認された。

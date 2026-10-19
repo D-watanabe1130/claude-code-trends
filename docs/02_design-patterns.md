@@ -1,6 +1,16 @@
 # Claude Code 設計パターン集
 
-最終更新: 2026-10-12
+最終更新: 2026-10-19
+
+## 直近の主要変更（2026-10-19）
+
+- **`autoCompactWindow` フロントマターフィールド（v2.1.296）**: サブエージェントが自動圧縮（autocompact）を発火させるトークン数を 100,000〜1,000,000 の範囲で個別設定。長時間稼働サブエージェントのコンテキスト管理に有効。記述は必ず整数値で（`autoCompactWindow: 200000`）。環境変数 `CLAUDE_CODE_AUTO_COMPACT_WINDOW` でも一括適用可能。
+- **`effort` per-invocation パラメーター（v2.1.292）**: Agent 呼び出し時に `effort` をフロントマターより高い優先度で指定可能。同一サブエージェント定義を複数エフォートレベルで動的に再利用できる。
+- **AGENTS.md プラグイン ID 変更（v2.1.285）**: `agents-md@builtin` → `cc-plugin-agents-md@builtin`。settings.json を参照している場合は移行推奨（両方の ID を認識するため後方互換あり）。
+- **`permissionDecision: "defer"`（フック）**: PreToolUse の permissionDecision 値として `defer` が公式確認（allow/deny/ask/defer の4択）。
+- **総フックイベント数: 33種**: 公式ドキュメントで明示。
+- **`bypassPermissions` 条件の訂正（v2.1.267）**: メインセッションが `default`/`dontAsk`/`plan` モード時にサブエージェントで設定可能（旧記録「bypassPermissions モード時のみ」は誤り）。
+- **`claude --debug` でunknownフィールドログ（v2.1.296）**: フロントマターのデバッグに活用可能。
 
 ## 直近の主要変更（2026-10-12）
 

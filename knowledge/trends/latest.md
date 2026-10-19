@@ -1,14 +1,18 @@
 # 最新トレンドサマリー
 
-最終更新: 2026-10-12
+最終更新: 2026-10-19
 
 ---
 
 ## 最新バージョン
 
-**v2.1.296+**（前回: v2.1.286+）
+**v2.1.296+**（前回: v2.1.296+）
 
 新規判明マイルストーン（今週）:
+- v2.1.292+: **`effort`** per-invocation パラメーター（Agent 呼び出し時にフロントマターを上書き）
+- v2.1.296+: **`autoCompactWindow`** フロントマターフィールド（サブエージェントの自動圧縮閾値）、`claude --debug` でunknownフィールドログ
+
+前週確認済みマイルストーン:
 - v2.1.295+: フックハンドラーの **`onFailure: "block"`** フィールド追加
 - v2.1.296+: **`CLAUDE_ENV_FILE`** が PowerShell でも利用可能に
 
@@ -53,32 +57,41 @@
 
 ---
 
-## 今週のホットトピック（2026-10-12）
+## 今週のホットトピック（2026-10-19）
 
-1. **v2.1.295+ `onFailure: "block"` でポリシーフックの安全化**: フックスクリプトがエラー終了した場合にアクションをブロックできるフィールドが追加。セキュリティ系フックの設定ミスによる素通り問題を解決。
+1. **`autoCompactWindow` フロントマターフィールド（v2.1.296）**: サブエージェントごとに自動圧縮の発火閾値を 100,000〜1,000,000 トークンで個別設定可能に。長時間稼働サブエージェントのコンテキスト管理が精緻化。整数値で記述が必須（"200k" 不可）。
 
-2. **3 種の新フックタイプ公式化（`mcp_tool` / `prompt` / `agent`）**: Shell スクリプト以外に MCP ツール・AI 評価・サブエージェントをフックハンドラーとして利用可能に。
+2. **`effort` per-invocation パラメーター（v2.1.292）**: Agent 呼び出し時にエフォートレベルをフロントマター設定を上書きして指定可能に。同一サブエージェント定義を複数エフォートレベルで再利用できる。
 
-3. **コンテキスト管理コマンドの精緻化**: `/btw`（コンテキスト非汚染確認）、部分要約 2 オプション（Summarize from/up to here）、`/compact <instructions>` が公式ベストプラクティスに明記。
+3. **`bypassPermissions` 条件の記録訂正**: 前回記録の「メインセッションが bypassPermissions 時のみ有効」は誤りで、正しくは「メインセッションが `default`/`dontAsk`/`plan` モードの場合に設定可能」。
 
 ---
 
-## 前週（2026-10-05）との主要差分
+## 前週（2026-10-12）との主要差分
 
 | カテゴリ | 変更内容 |
 |---------|---------|
-| バージョン | **v2.1.296+** 確認（前回 v2.1.286+）。2マイルストーン新規判明 |
-| **フックハンドラー** | **v2.1.295+**: `onFailure: "block"` フィールド追加 |
-| **フックタイプ** | `mcp_tool` / `prompt` / `agent` の3種が公式ドキュメントに明記 |
-| **環境変数** | **v2.1.296+**: `CLAUDE_ENV_FILE` が PowerShell でも動作 |
-| **コマンド** | `/goal`・`/btw`・`/compact <instructions>` がベストプラクティスに明記 |
-| **CLAUDE.md** | HTML コメント（`<!-- -->`）がコンテキスト注入前に除去されることが明記 |
-| **`/init`** | `CLAUDE_CODE_NEW_INIT=1` でインタラクティブ多段階フローが有効化 |
+| バージョン | v2.1.296+ のまま。新機能詳細（v2.1.292/v2.1.296）が判明 |
+| **サブエージェント** | **`autoCompactWindow`（v2.1.296）**: サブエージェント別自動圧縮閾値フィールド |
+| **サブエージェント** | **`effort` per-invocation（v2.1.292）**: Agent 呼び出し時のフロントマター上書き |
+| **環境変数** | **`CLAUDE_CODE_AUTO_COMPACT_WINDOW`**: autoCompactWindow の環境変数版 |
+| **プラグイン** | AGENTS.md プラグイン ID 変更: `agents-md@builtin` → `cc-plugin-agents-md@builtin`（v2.1.285、後方互換あり） |
+| **フック** | `permissionDecision` の選択肢に `defer` 確認（allow/deny/ask/defer） |
+| **フック** | 総フックイベント数: **33種** をドキュメントで明示 |
+| **デバッグ** | `claude --debug` でunknownフィールドに `does not recognize or apply` ログ（v2.1.296） |
+| **記録訂正** | `bypassPermissions` の使用条件: main が `default`/`dontAsk`/`plan` 時（前回の記録を修正） |
 
 ---
 
 ## 前々週以前からの既知事項（変更なし）
 
+- `autoCompactWindow` フロントマターフィールド（v2.1.296）
+- `effort` per-invocation パラメーター（v2.1.292）
+- `CLAUDE_CODE_AUTO_COMPACT_WINDOW` 環境変数
+- `cc-plugin-agents-md@builtin` プラグイン ID（v2.1.285、後方互換あり）
+- `permissionDecision: "defer"` オプション（PreToolUse フック、allow/deny/ask/defer）
+- 総フックイベント数: 33種（ドキュメント明示）
+- `bypassPermissions` はメインセッションが `default`/`dontAsk`/`plan` モード時にサブエージェントで設定可能（v2.1.267+）
 - `onFailure: "block"` フックハンドラーフィールド（v2.1.295+）
 - `CLAUDE_ENV_FILE` の PowerShell 対応（v2.1.296+）
 - フックタイプ `mcp_tool` / `prompt` / `agent`（公式ドキュメント化）

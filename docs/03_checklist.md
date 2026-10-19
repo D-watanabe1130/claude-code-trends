@@ -1,6 +1,6 @@
 # Claude Code 設計チェックリスト
 
-最終更新: 2026-10-12
+最終更新: 2026-10-19
 
 ---
 
@@ -23,6 +23,9 @@
 - [ ] 調査系タスクには `haiku`、品質系には `opus` を指定したか
 - [ ] 同じワーカーを繰り返し使う場合は `.claude/agents/` に定義したか
 - [ ] 調査にはサブエージェントを使い、メインコンテキストを守っているか
+- [ ] **（NEW v2.1.296）** 長時間稼働サブエージェントに `autoCompactWindow` で自動圧縮閾値を個別設定したか（整数値必須）
+- [ ] **（NEW v2.1.292）** Agent 呼び出し時に `effort` を per-invocation で上書きして動的エフォート制御を使っているか
+- [ ] AGENTS.md プラグイン設定を `cc-plugin-agents-md@builtin` ID で記述しているか（旧: `agents-md@builtin`、v2.1.285+）
 
 ---
 
@@ -49,6 +52,7 @@
 - [ ] 全フックを無効化したい場合に `disableAllHooks: true` を知っているか
 - [ ] **（NEW v2.1.295+）** セキュリティ系・ポリシー系フックに `onFailure: "block"` を設定しているか（設定ミスの素通り防止）
 - [ ] **（NEW）** `mcp_tool` / `prompt` / `agent` フックタイプの活用を検討したか（Shell スクリプト代替）
+- [ ] **（NEW）** `PreToolUse` の `permissionDecision` を使う場合 `defer` オプションも把握しているか（allow/deny/ask/defer）
 
 ---
 
