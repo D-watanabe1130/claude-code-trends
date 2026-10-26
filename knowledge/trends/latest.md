@@ -1,20 +1,21 @@
 # 最新トレンドサマリー
 
-最終更新: 2026-10-19
+最終更新: 2026-10-26
 
 ---
 
 ## 最新バージョン
 
-**v2.1.296+**（前回: v2.1.296+）
+**v2.1.304+**（前回: v2.1.296+）
 
 新規判明マイルストーン（今週）:
-- v2.1.292+: **`effort`** per-invocation パラメーター（Agent 呼び出し時にフロントマターを上書き）
-- v2.1.296+: **`autoCompactWindow`** フロントマターフィールド（サブエージェントの自動圧縮閾値）、`claude --debug` でunknownフィールドログ
+- v2.1.299: サブエージェント名がセッション再起動後も保持 / `CLAUDE_CODE_DISABLE_FILE_MENTIONS` 環境変数
+- v2.1.302: **`CLAUDE_CODE_FORK_SUBAGENT`** が全モードでデフォルトON（v2.1.232 のインタラクティブ限定から変更）
+- v2.1.304: 1スキルソースあたりフック上限が **1,024件** に拡張
 
 前週確認済みマイルストーン:
-- v2.1.295+: フックハンドラーの **`onFailure: "block"`** フィールド追加
-- v2.1.296+: **`CLAUDE_ENV_FILE`** が PowerShell でも利用可能に
+- v2.1.292+: **`effort`** per-invocation パラメーター（Agent 呼び出し時にフロントマターを上書き）
+- v2.1.296+: **`autoCompactWindow`** フロントマターフィールド（サブエージェントの自動圧縮閾値）、`claude --debug` でunknownフィールドログ
 
 主要マイルストーン（前週まで累積）:
 - v2.1.178+: ネストディレクトリで同名エージェントはCWD最近傍が優先
@@ -39,16 +40,19 @@
 - v2.1.232+: `CLAUDE_CODE_FORK_SUBAGENT` インタラクティブモードでデフォルトON
 - v2.1.233+: `claude plugin validate <path>` コマンド追加
 - v2.1.234+: `CLAUDE_CODE_PROJECT_DIR_NAME` 環境変数（Auto Memory の複数リポジトリ間共有）
+- v2.1.236+: PostToolUse の `classifierContext` フィールド（補完記録）
 - v2.1.238+: `.claude/agents/` のインライン MCP サーバー定義にフォルダトラスト要件を追加
 - v2.1.239+: `claudeMdExcludes` でシンボリックリンクのリンク元・リンク先両パスでマッチ可能に
 - v2.1.242+: `/tasks` コマンドでモデルとエフォートレベルを表示
-- v2.1.246+: `maxTurns` フロントマターフィールド / `maxTurns` 到達サブエージェントを「partial」としてマーク
+- v2.1.246+: `maxTurns` フロントマターフィールド / `maxTurns` 到達サブエージェントを「partial」としてマーク / `-p` モードで defer 時に `stop_reason: "tool_deferred"`
 - v2.1.248+: `experimental: { cacheTtl: '5m' | '1h' }` サブエージェント実験フィールド / exit 0 での JSON パース失敗を non-blocking エラーとして報告
 - v2.1.251+: **モデル解決順序変更** – フロントマター `model` が `CLAUDE_CODE_SUBAGENT_MODEL` より優先 / **SessionStart 再開時フィールド追加**: `seconds_since_last_response`・`context_tokens`・`prompt_cache_likely_expired`・`estimated_cache_write_usd`
 - v2.1.257+: `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` 環境変数（全サブエージェントモデルの強制上書き）/ `scratchpad_dir` フック共通入力フィールド追加
 - v2.1.261+: `--append-subagent-system-prompt-file` フラグ / 停止状態からのサブエージェント再開
 - v2.1.267+: `bypassPermissions` サブエージェント permissionMode / `cloud_credential_error` StopFailure マッチャー
+- v2.1.269+: PostToolUse の Bash `tool_response` に `bashEditDiff` フィールド（補完記録）
 - v2.1.271+: `omitClaudeMd` サブエージェントフロントマターフィールド（user/project/local CLAUDE.md をスキップ）
+- v2.1.274+: PreToolUse / PostToolUse の MCP ツールに `mcp_server` オブジェクト（補完記録）
 - v2.1.277+: **AGENTS.md ネイティブサポート**（`/config` に「Project instructions」設定追加）
 - v2.1.280+: `/memory`・`/context` が直接読み込んだ AGENTS.md をリスト表示
 - v2.1.281+: `--agents ./agents.json` JSON ファイル参照 / Bedrock・telemetry 無効環境での AGENTS.md 読み込みバグ修正
@@ -57,29 +61,33 @@
 
 ---
 
-## 今週のホットトピック（2026-10-19）
+## 今週のホットトピック（2026-10-26）
 
-1. **`autoCompactWindow` フロントマターフィールド（v2.1.296）**: サブエージェントごとに自動圧縮の発火閾値を 100,000〜1,000,000 トークンで個別設定可能に。長時間稼働サブエージェントのコンテキスト管理が精緻化。整数値で記述が必須（"200k" 不可）。
+1. **`CLAUDE_CODE_FORK_SUBAGENT` が全モードでデフォルトON（v2.1.302）**: v2.1.232 でインタラクティブモードのみデフォルトONだったフォークモードが、v2.1.302 で全モードのデフォルトに変更。オフにするには `CLAUDE_CODE_FORK_SUBAGENT=0` の明示設定が必要。
 
-2. **`effort` per-invocation パラメーター（v2.1.292）**: Agent 呼び出し時にエフォートレベルをフロントマター設定を上書きして指定可能に。同一サブエージェント定義を複数エフォートレベルで再利用できる。
+2. **サブエージェント名がセッション再起動後も保持（v2.1.299）**: `name` フロントマターで命名したサブエージェントの名前がセッション再起動後も持続。`SendMessage` での継続連絡が再起動をまたいで確実に機能するようになった。
 
-3. **`bypassPermissions` 条件の記録訂正**: 前回記録の「メインセッションが bypassPermissions 時のみ有効」は誤りで、正しくは「メインセッションが `default`/`dontAsk`/`plan` モードの場合に設定可能」。
+3. **フックスキルソースあたり上限が 1,024件 に拡張（v2.1.304）**: 大規模プラグインや組織フック体系のスケール制約が解消。
+
+4. **`CLAUDE_CODE_DISABLE_FILE_MENTIONS`（v2.1.299）**: PreToolUse フックで `@` 参照によるファイル読み込みを検知可能に。セキュリティフックでの `@` 参照監視ユースケースが開放された。
+
+5. **MCP ツール向けフック入力強化（v2.1.274）**: `mcp_server` オブジェクトが PreToolUse / PostToolUse に追加され、サーバー名・ラベル・トランスポート方式をフック内で参照可能に。
 
 ---
 
-## 前週（2026-10-12）との主要差分
+## 前週（2026-10-19）との主要差分
 
 | カテゴリ | 変更内容 |
 |---------|---------|
-| バージョン | v2.1.296+ のまま。新機能詳細（v2.1.292/v2.1.296）が判明 |
-| **サブエージェント** | **`autoCompactWindow`（v2.1.296）**: サブエージェント別自動圧縮閾値フィールド |
-| **サブエージェント** | **`effort` per-invocation（v2.1.292）**: Agent 呼び出し時のフロントマター上書き |
-| **環境変数** | **`CLAUDE_CODE_AUTO_COMPACT_WINDOW`**: autoCompactWindow の環境変数版 |
-| **プラグイン** | AGENTS.md プラグイン ID 変更: `agents-md@builtin` → `cc-plugin-agents-md@builtin`（v2.1.285、後方互換あり） |
-| **フック** | `permissionDecision` の選択肢に `defer` 確認（allow/deny/ask/defer） |
-| **フック** | 総フックイベント数: **33種** をドキュメントで明示 |
-| **デバッグ** | `claude --debug` でunknownフィールドに `does not recognize or apply` ログ（v2.1.296） |
-| **記録訂正** | `bypassPermissions` の使用条件: main が `default`/`dontAsk`/`plan` 時（前回の記録を修正） |
+| バージョン | v2.1.296+ → **v2.1.304+**（8バージョン進行）|
+| **サブエージェント** | **v2.1.302**: `CLAUDE_CODE_FORK_SUBAGENT` が全モードでデフォルトON |
+| **サブエージェント** | **v2.1.299**: サブエージェント名がセッション再起動後も保持 |
+| **環境変数** | **v2.1.299**: `CLAUDE_CODE_DISABLE_FILE_MENTIONS`（PreToolUse フックで `@` 参照可視化） |
+| **フック上限** | **v2.1.304**: スキルソースあたりフック上限 **1,024件** に拡張 |
+| **フック入力** | **v2.1.274**: MCP ツール向け `mcp_server` オブジェクト（server_name/server_label/transport） |
+| **フック入力** | **v2.1.269**: Bash PostToolUse の `bashEditDiff` フィールド |
+| **フック入力** | **v2.1.236**: PostToolUse の `classifierContext` フィールド |
+| **フック動作** | **v2.1.246**: `-p` モードで defer 時の `stop_reason: "tool_deferred"` |
 
 ---
 
@@ -103,8 +111,6 @@
 - フックコマンドの `args` フィールド（exec 形式、シェルバイパス）
 - CLAUDE.md の HTML ブロックコメント（`<!-- -->`）がコンテキスト注入前に除去
 - `Ctrl+Enter`/`Ctrl+X Ctrl+S` で閲覧中バックグラウンドエージェントにメッセージ送信（v2.1.286+）
-
----
 
 ---
 

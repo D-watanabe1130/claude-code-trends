@@ -2,6 +2,12 @@
 
 ---
 
+## 2026-10-26
+
+公式ドキュメント4種（best-practices/sub-agents/hooks/memory）を取得。外部GitHubソースはMCPスコープ制限により今週も取得不可。バージョンは **v2.1.304+** まで進行（前回 v2.1.296+、8バージョン進行）。今週最大の発見は **v2.1.302 での `CLAUDE_CODE_FORK_SUBAGENT` の全モードデフォルトON化** で、v2.1.232 でインタラクティブモードのみデフォルトONだったフォークモードが全モードに拡大された。オフにするには `CLAUDE_CODE_FORK_SUBAGENT=0` の明示設定が必要となる。**v2.1.299** では2つの重要な変更が確認された：サブエージェントの `name` がセッション再起動後も保持されるようになり `SendMessage` での継続連絡がより確実になったこと、および `CLAUDE_CODE_DISABLE_FILE_MENTIONS` 環境変数が追加されて PreToolUse フックで `@` 参照ファイル読み込みを検知できるようになったこと。**v2.1.304** では1スキルソースあたりのフック定義上限が **1,024件** に拡張され、大規模プラグインや組織フック体系でのスケール制約が解消された。補完記録として以前のバージョンで未記録だった3つのフックフィールドも確認された：**`classifierContext`（v2.1.236）**（PostToolUse で Auto Mode 分類器のコンテキスト情報を取得）、**`bashEditDiff`（v2.1.269）**（Bash PostToolUse の `tool_response` に差分情報）、**`mcp_server` オブジェクト（v2.1.274）**（PreToolUse/PostToolUse の MCP ツール呼び出しでサーバー名・ラベル・トランスポートを参照可能）。
+
+---
+
 ## 2026-10-19
 
 公式ドキュメント4種（best-practices/sub-agents/hooks/memory）を取得。外部GitHubソースはMCPスコープ制限により今週も取得不可。今週最大の発見は **`autoCompactWindow` サブエージェントフロントマターフィールド（v2.1.296）** で、サブエージェントごとに自動圧縮（autocompact）が発火するトークン数の閾値を 100,000〜1,000,000 の範囲で個別指定できるようになった。整数値での記述が必須（"200k" のような省略形は誤読される）。環境変数 `CLAUDE_CODE_AUTO_COMPACT_WINDOW` でも一括設定可能。同様に **`effort` per-invocation パラメーター（v2.1.292）** が新確認され、Agent ツール呼び出し時にその場でエフォートレベルを指定することで同一サブエージェント定義を複数エフォートで再利用できるようになった。AGENTS.md プラグインの内部 ID が `agents-md@builtin` から **`cc-plugin-agents-md@builtin`**（v2.1.285）に変更されており、settings.json でプラグイン設定を記述している場合は新 ID への移行が推奨される（後方互換あり）。フック面では `PreToolUse` の `permissionDecision` 選択肢として `defer` が確認され（allow/deny/ask/defer の4択）、フックイベントの総数が **33種** とドキュメントで明示された。また前回報告の **`bypassPermissions` の条件を訂正**：正しくはメインセッションが `default`/`dontAsk`/`plan` モードの場合にサブエージェントで `bypassPermissions` が設定可能（前回の「bypassPermissions モード時のみ有効」は誤り）。
