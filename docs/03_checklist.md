@@ -53,6 +53,9 @@
 - [ ] **（NEW v2.1.295+）** セキュリティ系・ポリシー系フックに `onFailure: "block"` を設定しているか（設定ミスの素通り防止）
 - [ ] **（NEW）** `mcp_tool` / `prompt` / `agent` フックタイプの活用を検討したか（Shell スクリプト代替）
 - [ ] **（NEW）** `PreToolUse` の `permissionDecision` を使う場合 `defer` オプションも把握しているか（allow/deny/ask/defer）
+- [ ] **（NEW 2026-11-02）** 画面表示のみを変えたい場合（機密マスク・整形）に `MessageDisplay` フックを検討したか（タイムアウト10秒、軽量処理専用）
+- [ ] **（NEW 2026-11-02）** 並列ツール呼び出し後に一括検証が必要なら `PostToolBatch` フックを設定したか
+- [ ] **（NEW 2026-11-02）** ワークツリーにカスタムパスを使いたい場合に `WorktreeCreate` HTTP フックの `worktreePath` 返却を検討したか
 
 ---
 

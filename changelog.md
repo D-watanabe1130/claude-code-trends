@@ -2,6 +2,12 @@
 
 ---
 
+## 2026-11-02
+
+公式ドキュメント4種（best-practices/sub-agents/hooks/memory）を取得。外部GitHubソースはMCPスコープ制限により今週も取得不可。バージョンは **v2.1.309+** まで進行（前回 v2.1.304+、5バージョン進行）。今週の唯一の新バージョン変更は **v2.1.309 の Git Bash 欠如エラーメッセージ改善**（Windows 環境向けの軽微なUX修正）。最大の発見は、前回レポートで「総33種」と記録していたフックイベントのうち詳細を未記録だった **4イベント**（`MessageDisplay`・`PostToolBatch`・`WorktreeCreate`・`WorktreeRemove`）の仕様判明。特に `MessageDisplay`（表示内容のみ変更、タイムアウト10秒）と `PostToolBatch`（並列ツールバッチ完了後の一括検証）は実用的なユースケースを持つ。また **v2.1.282** の WebSearch `mode` パラメーター（standard/extended）と **v2.1.290** の WebFetch `offset`・TaskCreated `agent_id` という補完確認も得られた。ベストプラクティスドキュメントでは `"be ambitious"` プロンプト技法が公式化され、スペースを含むパスの `@` インポートにはバックスラッシュが必要という記法も明確化された。
+
+---
+
 ## 2026-10-26
 
 公式ドキュメント4種（best-practices/sub-agents/hooks/memory）を取得。外部GitHubソースはMCPスコープ制限により今週も取得不可。バージョンは **v2.1.304+** まで進行（前回 v2.1.296+、8バージョン進行）。今週最大の発見は **v2.1.302 での `CLAUDE_CODE_FORK_SUBAGENT` の全モードデフォルトON化** で、v2.1.232 でインタラクティブモードのみデフォルトONだったフォークモードが全モードに拡大された。オフにするには `CLAUDE_CODE_FORK_SUBAGENT=0` の明示設定が必要となる。**v2.1.299** では2つの重要な変更が確認された：サブエージェントの `name` がセッション再起動後も保持されるようになり `SendMessage` での継続連絡がより確実になったこと、および `CLAUDE_CODE_DISABLE_FILE_MENTIONS` 環境変数が追加されて PreToolUse フックで `@` 参照ファイル読み込みを検知できるようになったこと。**v2.1.304** では1スキルソースあたりのフック定義上限が **1,024件** に拡張され、大規模プラグインや組織フック体系でのスケール制約が解消された。補完記録として以前のバージョンで未記録だった3つのフックフィールドも確認された：**`classifierContext`（v2.1.236）**（PostToolUse で Auto Mode 分類器のコンテキスト情報を取得）、**`bashEditDiff`（v2.1.269）**（Bash PostToolUse の `tool_response` に差分情報）、**`mcp_server` オブジェクト（v2.1.274）**（PreToolUse/PostToolUse の MCP ツール呼び出しでサーバー名・ラベル・トランスポートを参照可能）。
